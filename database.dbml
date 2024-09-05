@@ -1,0 +1,76 @@
+Table participants {
+  id INTEGER [pk, increment]
+  name VARCHAR(255) [not null]
+  address TEXT [not null]
+  whatsapp VARCHAR(15) [not null]
+  gender VARCHAR(10)
+  created_at DATETIME [default: `CURRENT_TIMESTAMP`]
+}
+
+Table participants_additional_info {
+  id INTEGER [pk, increment]
+  participant_id INTEGER [not null, ref: > participants.id]
+  size VARCHAR(50)       // Ukuran kaos
+  transport_type VARCHAR(50) // Jenis transportasi
+  city VARCHAR(255)      // Kota asal
+}
+
+Table users {
+  id INTEGER [pk, increment]
+  username VARCHAR(50) [not null]
+  password VARCHAR(255) [not null]
+  role VARCHAR(20) [not null]
+  created_at DATETIME [default: `CURRENT_TIMESTAMP`]
+}
+
+Table events {
+  id INTEGER [pk, increment]
+  title VARCHAR(255) [not null]
+  description TEXT
+  date DATE [not null]
+  price INTEGER [default: 0]
+  capacity INTEGER [not null]
+  location VARCHAR(255)
+  created_at DATETIME [default: `CURRENT_TIMESTAMP`]
+}
+
+Table reservations {
+  id INTEGER [pk, increment]
+  participant_id INTEGER [not null, ref: > participants.id]
+  event_id INTEGER [not null, ref: > events.id]
+  status VARCHAR(20) [not null]
+  booking_code VARCHAR(50) [not null]
+  created_at DATETIME [default: `CURRENT_TIMESTAMP`]
+  approved_at DATETIME
+}
+
+Table payments {
+  id INTEGER [pk, increment]
+  reservation_id INTEGER [not null, ref: > reservations.id]
+  payment_date DATETIME [not null]
+  amount DECIMAL(10,2) [not null]
+  status VARCHAR(20) [not null]
+  created_at DATETIME [default: `CURRENT_TIMESTAMP`]
+}
+
+Table sessions {
+  id INTEGER [pk, increment]
+  event_id INTEGER [not null, ref: > events.id]
+  unix TEXT [not null] // Kode sesi unik
+  name TEXT [not null] // Nama sesi
+  desc TEXT [not null] // Deskripsi sesi
+}
+
+Table validators {
+  id INTEGER [pk, increment]
+  name TEXT [not null] // Nama validator
+  user_id INTEGER [ref: > users.id] // Optional Foreign Key dari tabel users
+}
+
+Table scanned {
+  id INTEGER [pk, increment]
+  scanTime INTEGER [not null] // Waktu scan dalam bentuk timestamp
+  participant_id INTEGER [not null, ref: > participants.id] // Foreign Key dari peserta yang di-scan
+  validator_id INTEGER [not null, ref: > validators.id] // Foreign Key dari validator yang melakukan scan
+  session_id INTEGER [not null, ref: > sessions.id] // Foreign Key dari sesi yang di-scan
+}
