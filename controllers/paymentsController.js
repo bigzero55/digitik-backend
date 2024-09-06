@@ -1,30 +1,73 @@
+const midtransClient = require("midtrans-client");
 const paymentsModel = require("../models/paymentsModel");
+require("dotenv").config();
 
-// Tambah payment
+// Buat instance Snap API Midtrans
+let snap = new midtransClient.Snap({
+  isProduction: process.env.M_PRODUCTION, // Ganti ke true jika di Production
+  serverKey: process.env.M_SERVER_KEY, // Ambil serverKey dari .env
+});
+
+// Tambah payment dengan Midtrans
 exports.addPayment = (req, res) => {
-  const { reservationId, amount, status, paidAt } = req.body;
+  const { reservationId, amount, status, paidAt, participantDetails } =
+    req.body;
 
-  if (!reservationId || !amount || !status || !paidAt) {
+  if (!reservationId || !amount || !status || !paidAt || !participantDetails) {
     return res.status(400).json({ message: "All fields are required!" });
   }
 
-  paymentsModel.addPayment(
-    reservationId,
-    amount,
-    status,
-    paidAt,
-    (err, paymentId) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ message: "Failed to add payment", error: err.message });
-      }
-      res.status(201).json({
-        message: "Payment added successfully",
-        paymentId: paymentId,
-      });
-    }
-  );
+  // Buat parameter transaksi Midtrans
+  let parameter = {
+    transaction_details: {
+      order_id: `reservation-${reservationId}`, // Menggunakan reservationId sebagai order_id
+      gross_amount: amount,
+    },
+    customer_details: {
+      first_name: participantDetails.first_name,
+      last_name: participantDetails.last_name,
+      email: participantDetails.email,
+      phone: participantDetails.phone,
+    },
+    credit_card: {
+      secure: true,
+    },
+  };
+
+  // Buat transaksi Midtrans
+  snap
+    .createTransaction(parameter)
+    .then((transaction) => {
+      // Dapatkan token transaksi dari Midtrans
+      let transactionToken = transaction.token;
+
+      // Tambahkan payment ke database
+      paymentsModel.addPayment(
+        reservationId,
+        amount,
+        status,
+        paidAt,
+        (err, paymentId) => {
+          if (err) {
+            return res
+              .status(500)
+              .json({ message: "Failed to add payment", error: err.message });
+          }
+
+          // Kirim respons ke frontend dengan token transaksi Midtrans
+          res.status(201).json({
+            message: "Payment added successfully",
+            paymentId: paymentId,
+            transactionToken: transactionToken, // Kirim token ke frontend
+          });
+        }
+      );
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ message: "Failed to create transaction", error: err.message });
+    });
 };
 
 // Get all payments
