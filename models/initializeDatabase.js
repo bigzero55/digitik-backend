@@ -2,7 +2,7 @@ const db = require("./db");
 
 const initializeDatabase = () => {
   db.serialize(() => {
-    // Create tables if they don't exist
+    // Create tables if they don't exi
     db.run(`CREATE TABLE IF NOT EXISTS participants (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
