@@ -1,45 +1,60 @@
 const db = require("./db");
 
-class Participant {
-  static create(participant, callback) {
-    const { name, address, whatsapp, gender, additional_info } = participant;
-    db.run(
-      "INSERT INTO participants (name, address, whatsapp, gender, additional_info) VALUES (?, ?, ?, ?, ?)",
-      [name, address, whatsapp, gender, JSON.stringify(additional_info)],
-      function (err) {
-        callback(err, this.lastID);
-      }
-    );
-  }
+// Fungsi untuk menambah participant
+const createParticipant = (participant, callback) => {
+  const { name, address, whatsapp, additional_info } = participant;
+  const sql = `
+    INSERT INTO participants (name, address, whatsapp, additional_info)
+    VALUES (?, ?, ?, ?)
+  `;
+  const params = [name, address, whatsapp, JSON.stringify(additional_info)];
+  db.run(sql, params, function (err) {
+    callback(err, this.lastID);
+  });
+};
 
-  static findAll(callback) {
-    db.all("SELECT * FROM participants", [], (err, rows) => {
-      callback(err, rows);
-    });
-  }
+// Fungsi untuk mendapatkan semua participants
+const getAllParticipants = (callback) => {
+  const sql = "SELECT * FROM participants";
+  db.all(sql, [], (err, rows) => {
+    callback(err, rows);
+  });
+};
 
-  static findById(id, callback) {
-    db.get("SELECT * FROM participants WHERE id = ?", [id], (err, row) => {
-      callback(err, row);
-    });
-  }
+// Fungsi untuk mendapatkan participant berdasarkan ID
+const getParticipantById = (id, callback) => {
+  const sql = "SELECT * FROM participants WHERE id = ?";
+  db.get(sql, [id], (err, row) => {
+    callback(err, row);
+  });
+};
 
-  static update(id, participant, callback) {
-    const { name, address, whatsapp, gender, additional_info } = participant;
-    db.run(
-      "UPDATE participants SET name = ?, address = ?, whatsapp = ?, gender = ?, additional_info = ? WHERE id = ?",
-      [name, address, whatsapp, gender, JSON.stringify(additional_info), id],
-      (err) => {
-        callback(err);
-      }
-    );
-  }
+// Fungsi untuk mengupdate participant
+const updateParticipant = (id, participant, callback) => {
+  const { name, address, whatsapp, additional_info } = participant;
+  const sql = `
+    UPDATE participants
+    SET name = ?, address = ?, whatsapp = ?, additional_info = ?
+    WHERE id = ?
+  `;
+  const params = [name, address, whatsapp, JSON.stringify(additional_info), id];
+  db.run(sql, params, function (err) {
+    callback(err);
+  });
+};
 
-  static delete(id, callback) {
-    db.run("DELETE FROM participants WHERE id = ?", [id], (err) => {
-      callback(err);
-    });
-  }
-}
+// Fungsi untuk menghapus participant
+const deleteParticipant = (id, callback) => {
+  const sql = "DELETE FROM participants WHERE id = ?";
+  db.run(sql, [id], function (err) {
+    callback(err);
+  });
+};
 
-module.exports = Participant;
+module.exports = {
+  createParticipant,
+  getAllParticipants,
+  getParticipantById,
+  updateParticipant,
+  deleteParticipant,
+};
