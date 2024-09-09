@@ -17,7 +17,6 @@ const initializeDatabase = () => {
       name TEXT NOT NULL,
       unix TEXT NOT NULL,
       whatsapp TEXT NOT NULL,
-      gender TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     )`);
