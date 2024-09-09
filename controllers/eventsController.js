@@ -1,30 +1,9 @@
 const eventModel = require("../models/eventsModel");
 const scannedModel = require("../models/scannedModel");
 
-// Helper function to convert callback-based methods to promises
-const promisify =
-  (fn) =>
-  (...args) =>
-    new Promise((resolve, reject) => {
-      fn(...args, (err, result) => {
-        if (err) reject(err);
-        else resolve(result);
-      });
-    });
-
-// Wrap eventModel methods with promisify
-const getAllEvents = promisify(eventModel.getAllEvents);
-const getEventById = promisify(eventModel.getEventById);
-const addEvent = promisify(eventModel.addEvent);
-const updateEvent = promisify(eventModel.updateEvent);
-const deleteEvent = promisify(eventModel.deleteEvent);
-const getSessionsByEvent = promisify(eventModel.getSessionsByEvent);
-const deleteSessionsByEvent = promisify(eventModel.deleteSessionsByEvent);
-const deleteScannedBySession = promisify(scannedModel.deleteScannedBySession);
-
 exports.getAllEvents = async (req, res) => {
   try {
-    const events = await getAllEvents();
+    const events = await eventModel.getAllEvents();
     res.json(events);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -34,7 +13,7 @@ exports.getAllEvents = async (req, res) => {
 exports.getEventById = async (req, res) => {
   const { id } = req.params;
   try {
-    const event = await getEventById(id);
+    const event = await eventModel.getEventById(id);
     if (event) {
       res.json(event);
     } else {
@@ -48,7 +27,7 @@ exports.getEventById = async (req, res) => {
 exports.createEvent = async (req, res) => {
   const event = req.body;
   try {
-    const newEventId = await addEvent(
+    const newEventId = await eventModel.addEvent(
       event.user_id,
       event.title,
       event.unix,
@@ -68,7 +47,7 @@ exports.updateEvent = async (req, res) => {
   const { id } = req.params;
   const event = req.body;
   try {
-    await updateEvent(
+    await eventModel.updateEvent(
       id,
       event.user_id,
       event.title,
@@ -89,18 +68,18 @@ exports.deleteEvent = async (req, res) => {
   const { id } = req.params;
   try {
     // Get all sessions related to the event
-    const sessions = await getSessionsByEvent(id);
+    const sessions = await eventModel.getSessionsByEvent(id);
 
     // Delete all scanned records related to these sessions
     for (const session of sessions) {
-      await deleteScannedBySession(session.id);
+      await scannedModel.deleteScannedBySession(session.id);
     }
 
     // Delete all sessions related to the event
-    await deleteSessionsByEvent(id);
+    await eventModel.deleteSessionsByEvent(id);
 
     // Delete the event itself
-    await deleteEvent(id);
+    await eventModel.deleteEvent(id);
 
     res.json({
       message:
