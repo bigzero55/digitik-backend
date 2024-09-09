@@ -1,22 +1,40 @@
 const eventModel = require("../models/eventsModel");
-const sessionModel = require("../models/sessionsModel");
 const scannedModel = require("../models/scannedModel");
 
-// Get all events
+// Helper function to convert callback-based methods to promises
+const promisify =
+  (fn) =>
+  (...args) =>
+    new Promise((resolve, reject) => {
+      fn(...args, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+
+// Wrap eventModel methods with promisify
+const getAllEvents = promisify(eventModel.getAllEvents);
+const getEventById = promisify(eventModel.getEventById);
+const addEvent = promisify(eventModel.addEvent);
+const updateEvent = promisify(eventModel.updateEvent);
+const deleteEvent = promisify(eventModel.deleteEvent);
+const getSessionsByEvent = promisify(eventModel.getSessionsByEvent);
+const deleteSessionsByEvent = promisify(eventModel.deleteSessionsByEvent);
+const deleteScannedBySession = promisify(scannedModel.deleteScannedBySession);
+
 exports.getAllEvents = async (req, res) => {
   try {
-    const events = await eventModel.getAllEvents();
+    const events = await getAllEvents();
     res.json(events);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Get a single event by ID
 exports.getEventById = async (req, res) => {
   const { id } = req.params;
   try {
-    const event = await eventModel.getEventById(id);
+    const event = await getEventById(id);
     if (event) {
       res.json(event);
     } else {
@@ -27,46 +45,62 @@ exports.getEventById = async (req, res) => {
   }
 };
 
-// Create a new event
 exports.createEvent = async (req, res) => {
   const event = req.body;
   try {
-    const newEventId = await eventModel.createEvent(event);
+    const newEventId = await addEvent(
+      event.user_id,
+      event.title,
+      event.unix,
+      event.description,
+      event.date,
+      event.price,
+      event.capacity,
+      event.location
+    );
     res.status(201).json({ id: newEventId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Update an event
 exports.updateEvent = async (req, res) => {
   const { id } = req.params;
   const event = req.body;
   try {
-    await eventModel.updateEvent(id, event);
+    await updateEvent(
+      id,
+      event.user_id,
+      event.title,
+      event.unix,
+      event.description,
+      event.date,
+      event.price,
+      event.capacity,
+      event.location
+    );
     res.json({ message: "Event updated successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Delete an event and associated sessions and scanned records
 exports.deleteEvent = async (req, res) => {
   const { id } = req.params;
   try {
     // Get all sessions related to the event
-    const sessions = await sessionModel.getSessionsByEvent(id);
+    const sessions = await getSessionsByEvent(id);
 
     // Delete all scanned records related to these sessions
     for (const session of sessions) {
-      await scannedModel.deleteScannedBySession(session.id);
+      await deleteScannedBySession(session.id);
     }
 
     // Delete all sessions related to the event
-    await sessionModel.deleteSessionsByEvent(id);
+    await deleteSessionsByEvent(id);
 
     // Delete the event itself
-    await eventModel.deleteEvent(id);
+    await deleteEvent(id);
 
     res.json({
       message:

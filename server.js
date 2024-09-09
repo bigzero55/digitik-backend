@@ -5,7 +5,6 @@ const PORT = process.env.PORT;
 const initializeDatabase = require("./models/initializeDatabase");
 
 initializeDatabase();
-
 app.listen(PORT, () => {
-  console.log(`Server running on port ${HOST}:${PORT}`);
+  console.log(`Server running on http://${HOST}:${PORT}`);
 });

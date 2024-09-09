@@ -8,6 +8,7 @@ const paymentsRoutes = require("./paymentsRoutes");
 const sessionsRoutes = require("./sessionsRoutes");
 const validatorsRoutes = require("./validatorsRoutes");
 const scannedRoutes = require("./scannedRoutes");
+const authRoutes = require("./authRoutes");
 
 router.use("/participants", participantsRoutes);
 router.use("/users", usersRoutes);
@@ -17,6 +18,7 @@ router.use("/payments", paymentsRoutes);
 router.use("/sessions", sessionsRoutes);
 router.use("/validators", validatorsRoutes);
 router.use("/scanned", scannedRoutes);
+router.use("/auth", authRoutes);
 
 router.get("/status", (req, res) => {
   res.json({ status: "ok" });

@@ -1,92 +1,64 @@
 const db = require("./db");
 
 // Get all scanned records
-exports.getAllScanned = () => {
-  return new Promise((resolve, reject) => {
-    db.all("SELECT * FROM scanned", (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
-      }
-    });
+const getAllScanned = (callback) => {
+  const sql = "SELECT * FROM scanned";
+  db.all(sql, [], (err, rows) => {
+    callback(err, rows);
   });
 };
 
 // Get a single scanned record by ID
-exports.getScannedById = (id) => {
-  return new Promise((resolve, reject) => {
-    db.get("SELECT * FROM scanned WHERE id = ?", [id], (err, row) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(row);
-      }
-    });
+const getScannedById = (id, callback) => {
+  const sql = "SELECT * FROM scanned WHERE id = ?";
+  db.get(sql, [id], (err, row) => {
+    callback(err, row);
   });
 };
 
 // Create a new scanned record
-exports.createScanned = (scanned) => {
+const createScanned = (scanned, callback) => {
   const { scanTime, participant_id, validator_id, session_id } = scanned;
-  return new Promise((resolve, reject) => {
-    db.run(
-      "INSERT INTO scanned (scanTime, participant_id, validator_id, session_id) VALUES (?, ?, ?, ?)",
-      [scanTime, participant_id, validator_id, session_id],
-      function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(this.lastID);
-        }
-      }
-    );
+  const sql =
+    "INSERT INTO scanned (scanTime, participant_id, validator_id, session_id) VALUES (?, ?, ?, ?)";
+  const params = [scanTime, participant_id, validator_id, session_id];
+  db.run(sql, params, function (err) {
+    callback(err, this.lastID);
   });
 };
 
 // Update a scanned record
-exports.updateScanned = (id, scanned) => {
+const updateScanned = (id, scanned, callback) => {
   const { scanTime, participant_id, validator_id, session_id } = scanned;
-  return new Promise((resolve, reject) => {
-    db.run(
-      "UPDATE scanned SET scanTime = ?, participant_id = ?, validator_id = ?, session_id = ? WHERE id = ?",
-      [scanTime, participant_id, validator_id, session_id, id],
-      function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      }
-    );
+  const sql =
+    "UPDATE scanned SET scanTime = ?, participant_id = ?, validator_id = ?, session_id = ? WHERE id = ?";
+  const params = [scanTime, participant_id, validator_id, session_id, id];
+  db.run(sql, params, (err) => {
+    callback(err);
   });
 };
 
 // Delete a scanned record
-exports.deleteScanned = (id) => {
-  return new Promise((resolve, reject) => {
-    db.run("DELETE FROM scanned WHERE id = ?", [id], function (err) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
+const deleteScanned = (id, callback) => {
+  const sql = "DELETE FROM scanned WHERE id = ?";
+  db.run(sql, [id], (err) => {
+    callback(err);
   });
 };
 
-exports.deleteScannedBySession = (session_id) => {
-  return new Promise((resolve, reject) => {
-    db.run(
-      "DELETE FROM scanned WHERE session_id = ?",
-      [session_id],
-      function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      }
-    );
+// Delete scanned records by session ID
+const deleteScannedBySession = (session_id, callback) => {
+  const sql = "DELETE FROM scanned WHERE session_id = ?";
+  db.run(sql, [session_id], (err) => {
+    callback(err);
   });
+};
+
+module.exports = {
+  getAllScanned,
+  getScannedById,
+  createScanned,
+  updateScanned,
+  deleteScanned,
+  deleteScannedBySession,
 };

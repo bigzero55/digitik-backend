@@ -1,12 +1,31 @@
 const db = require("./db");
 
 // Fungsi untuk menambah event
-const addEvent = (name, description, capacity, date, callback) => {
+const addEvent = (
+  user_id,
+  title,
+  unix,
+  description,
+  date,
+  price,
+  capacity,
+  location,
+  callback
+) => {
   const sql = `
-    INSERT INTO events (name, description, capacity, date)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO events (user_id, title, unix, description, date, price, capacity, location)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
-  const params = [name, description, capacity, date];
+  const params = [
+    user_id,
+    title,
+    unix,
+    description,
+    date,
+    price,
+    capacity,
+    location,
+  ];
   db.run(sql, params, function (err) {
     callback(err, this.lastID);
   });
@@ -29,13 +48,34 @@ const getEventById = (id, callback) => {
 };
 
 // Fungsi untuk mengupdate event
-const updateEvent = (id, name, description, capacity, date, callback) => {
+const updateEvent = (
+  id,
+  user_id,
+  title,
+  unix,
+  description,
+  date,
+  price,
+  capacity,
+  location,
+  callback
+) => {
   const sql = `
     UPDATE events
-    SET name = ?, description = ?, capacity = ?, date = ?
+    SET user_id = ?, title = ?, unix = ?, description = ?, date = ?, price = ?, capacity = ?, location = ?
     WHERE id = ?
   `;
-  const params = [name, description, capacity, date, id];
+  const params = [
+    user_id,
+    title,
+    unix,
+    description,
+    date,
+    price,
+    capacity,
+    location,
+    id,
+  ];
   db.run(sql, params, function (err) {
     callback(err);
   });

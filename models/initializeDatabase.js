@@ -6,6 +6,7 @@ const initializeDatabase = () => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL,
+      email TEXT NOT NULL,
       password TEXT NOT NULL,
       full_name TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -16,7 +17,8 @@ const initializeDatabase = () => {
       user_id INTEGER NOT NULL,
       name TEXT NOT NULL,
       unix TEXT NOT NULL,
-      whatsapp TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      email TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     )`);
