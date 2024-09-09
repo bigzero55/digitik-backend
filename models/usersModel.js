@@ -1,12 +1,12 @@
 const db = require("./db");
 
 // Fungsi untuk menambah user
-const addUser = (username, password, role, callback) => {
+const addUser = (username, password, full_name, callback) => {
   const sql = `
-    INSERT INTO users (username, password, role)
+    INSERT INTO users (username, password, full_name)
     VALUES (?, ?, ?)
   `;
-  const params = [username, password, role];
+  const params = [username, password, full_name];
   db.run(sql, params, function (err) {
     callback(err, this.lastID);
   });
@@ -29,13 +29,13 @@ const getUserById = (id, callback) => {
 };
 
 // Fungsi untuk mengupdate user
-const updateUser = (id, username, password, role, callback) => {
+const updateUser = (id, username, password, full_name, callback) => {
   const sql = `
     UPDATE users
-    SET username = ?, password = ?, role = ?
+    SET username = ?, password = ?, full_name = ?
     WHERE id = ?
   `;
-  const params = [username, password, role, id];
+  const params = [username, password, full_name, id];
   db.run(sql, params, function (err) {
     callback(err);
   });
