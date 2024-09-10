@@ -1,4 +1,4 @@
-const usersModel = require("../model/usersModel");
+const usersModel = require("../models/usersModel");
 
 // Controller untuk menambah user baru
 const addUser = (req, res) => {
