@@ -3,7 +3,7 @@ const db = require("./db");
 // Tambah user baru
 const addUser = (user, callback) => {
   const { username, password, full_name } = user;
-  const sql = "INSERT INTO users (username, password, full_name) VALUES (?, ?, ?)";
+  const sql = "INSERT INTO users (username, email, password, full_name) VALUES (?, ?, ?, ?)";
   const params = [username, password, full_name];
   db.run(sql, params, function (err) {
     callback(err, this.lastID);
