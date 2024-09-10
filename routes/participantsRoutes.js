@@ -1,19 +1,20 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const participantsController = require("../controllers/participantsController");
+const participantsController = require('../controllers/participantsController');
 
-// Participants routes
-router.get("/", participantsController.getAllParticipants);
-router.get("/:id", participantsController.getParticipantById);
-router.post("/", participantsController.createParticipant);
-router.put("/:id", participantsController.updateParticipant);
-router.delete("/:id", participantsController.deleteParticipant);
+// Route untuk menambah participant
+router.post('/participants', participantsController.createParticipant);
 
-// Additional info routes
-router.post("/additional-info", participantsController.addAdditionalInfo);
-router.get(
-  "/additional-info/:participant_id",
-  participantsController.getAdditionalInfo
-);
+// Route untuk mendapatkan semua participants
+router.get('/participants', participantsController.getAllParticipants);
+
+// Route untuk mendapatkan participant berdasarkan ID
+router.get('/participants/:id', participantsController.getParticipantById);
+
+// Route untuk mengupdate participant berdasarkan ID
+router.put('/participants/:id', participantsController.updateParticipant);
+
+// Route untuk menghapus participant berdasarkan ID
+router.delete('/participants/:id', participantsController.deleteParticipant);
 
 module.exports = router;
