@@ -41,15 +41,14 @@ const getEventById = (id, callback) => {
 
 // Update data event
 const updateEvent = (id, event, callback) => {
-  const { title, unix, description, date, price, capacity, location } = event;
+  const { title, description, date, price, capacity, location } = event;
   const sql = `
     UPDATE events
-    SET title = ?, unix = ?, description = ?, date = ?, price = ?, capacity = ?, location = ?
+    SET title = ?, description = ?, date = ?, price = ?, capacity = ?, location = ?
     WHERE id = ?
   `;
   const params = [
     title,
-    unix,
     description,
     date,
     price,
