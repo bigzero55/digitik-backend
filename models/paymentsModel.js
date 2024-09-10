@@ -2,12 +2,12 @@ const db = require("./db");
 
 // Tambah pembayaran baru
 const addPayment = (payment, callback) => {
-  const { reservation_id, amount, status, paid_at } = payment;
+  const { user_id, reservation_id, payment_date, amount, status } = payment;
   const sql = `
-    INSERT INTO payments (reservation_id, amount, status, paid_at)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO payments (user_id, reservation_id, payment_date, amount, status)
+    VALUES (?, ?, ?, ?,?)
   `;
-  const params = [reservation_id, amount, status, paid_at];
+  const params = [user_id, reservation_id, payment_date, amount, status ];
   db.run(sql, params, function (err) {
     callback(err, this.lastID); // Mengembalikan ID pembayaran yang baru
   });
@@ -31,13 +31,13 @@ const getPaymentById = (id, callback) => {
 
 // Update data pembayaran
 const updatePayment = (id, payment, callback) => {
-  const { reservation_id, amount, status, paid_at } = payment;
+  const { payment_date, status  } = payment;
   const sql = `
     UPDATE payments
-    SET reservation_id = ?, amount = ?, status = ?, paid_at = ?
+    SET payment_date = ?, status = ?
     WHERE id = ?
   `;
-  const params = [reservation_id, amount, status, paid_at, id];
+  const params = [ payment_date, status];
   db.run(sql, params, (err) => {
     callback(err);
   });
