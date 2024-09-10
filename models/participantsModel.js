@@ -2,12 +2,12 @@ const db = require("./db");
 
 // Fungsi untuk menambah participant
 const createParticipant = (participant, callback) => {
-  const { name, address, whatsapp, additional_info } = participant;
+  const {user_id, name, unix, phone, email} = participant;
   const sql = `
-    INSERT INTO participants (name, address, whatsapp, additional_info)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO participants (user_id, name, unix, phone, email)
+    VALUES (?, ?, ?, ?, ?)
   `;
-  const params = [name, address, whatsapp, JSON.stringify(additional_info)];
+  const params =[user_id, name, unix, phone, email];
   db.run(sql, params, function (err) {
     callback(err, this.lastID);
   });
@@ -31,13 +31,13 @@ const getParticipantById = (id, callback) => {
 
 // Fungsi untuk mengupdate participant
 const updateParticipant = (id, participant, callback) => {
-  const { name, address, whatsapp, additional_info } = participant;
+  const { name, phone, email } = participant;
   const sql = `
     UPDATE participants
-    SET name = ?, address = ?, whatsapp = ?, additional_info = ?
+    SET name = ?, phone = ?, email = ?
     WHERE id = ?
   `;
-  const params = [name, address, whatsapp, JSON.stringify(additional_info), id];
+  const params = [name, phone, email, id];
   db.run(sql, params, function (err) {
     callback(err);
   });
