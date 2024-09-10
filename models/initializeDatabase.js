@@ -23,7 +23,7 @@ const initializeDatabase = () => {
       FOREIGN KEY (user_id) REFERENCES users(id)
     )`);
 
-    //unused
+    //undrefactored
 
     db.run(`CREATE TABLE IF NOT EXISTS participants_additional_info (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,11 +62,13 @@ const initializeDatabase = () => {
 
     db.run(`CREATE TABLE IF NOT EXISTS payments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
       reservation_id INTEGER NOT NULL,
       payment_date DATETIME NOT NULL,
       amount DECIMAL(10,2) NOT NULL,
       status TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (reservation_id) REFERENCES reservations(id)
     )`);
 
