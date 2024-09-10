@@ -1,100 +1,68 @@
 const reservationsModel = require("../models/reservationsModel");
 
-// Tambah reservation
-exports.addReservation = (req, res) => {
-  const { participantId, eventId, status, amount, createdAt } = req.body;
-
-  if (!participantId || !eventId || !status || !amount || !createdAt) {
-    return res.status(400).json({ message: "All fields are required!" });
-  }
-
-  reservationsModel.addReservation(
-    participantId,
-    eventId,
-    status,
-    amount,
-    createdAt,
-    (err, reservationId) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ message: "Failed to add reservation", error: err.message });
-      }
-      res.status(201).json({
-        message: "Reservation added successfully",
-        reservationId: reservationId,
-      });
+// Tambah reservasi baru
+const createReservation = (req, res) => {
+  const newReservation = req.body
+  reservationsModel.addReservation(newReservation, (err, reservationId) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to create reservation" });
     }
-  );
+    res.status(201).json({ message: "Reservation created", reservationId });
+  });
 };
 
-// Get all reservations
-exports.getAllReservations = (req, res) => {
+// Dapatkan semua reservasi
+const getAllReservations = (req, res) => {
   reservationsModel.getAllReservations((err, reservations) => {
     if (err) {
-      return res.status(500).json({
-        message: "Failed to retrieve reservations",
-        error: err.message,
-      });
+      return res.status(500).json({ error: "Failed to retrieve reservations" });
     }
     res.status(200).json(reservations);
   });
 };
 
-// Get reservation by ID
-exports.getReservationById = (req, res) => {
-  const { id } = req.params;
+// Dapatkan reservasi berdasarkan ID
+const getReservationById = (req, res) => {
+  const id = req.params.id;
   reservationsModel.getReservationById(id, (err, reservation) => {
     if (err) {
-      return res.status(500).json({
-        message: "Failed to retrieve reservation",
-        error: err.message,
-      });
+      return res.status(500).json({ error: "Failed to retrieve reservation" });
     }
     if (!reservation) {
-      return res.status(404).json({ message: "Reservation not found" });
+      return res.status(404).json({ error: "Reservation not found" });
     }
     res.status(200).json(reservation);
   });
 };
 
-// Update reservation
-exports.updateReservation = (req, res) => {
-  const { id } = req.params;
-  const { participantId, eventId, status, amount, updatedAt } = req.body;
+// Update data reservasi
+const updateReservation = (req, res) => {
+  const id = req.params.id;
+  const updatedReservation = req.body
 
-  if (!participantId || !eventId || !status || !amount || !updatedAt) {
-    return res.status(400).json({ message: "All fields are required!" });
-  }
-
-  reservationsModel.updateReservation(
-    id,
-    participantId,
-    eventId,
-    status,
-    amount,
-    updatedAt,
-    (err) => {
-      if (err) {
-        return res.status(500).json({
-          message: "Failed to update reservation",
-          error: err.message,
-        });
-      }
-      res.status(200).json({ message: "Reservation updated successfully" });
+  reservationsModel.updateReservation(id, updatedReservation, (err) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to update reservation" });
     }
-  );
+    res.status(200).json({ message: "Reservation updated successfully" });
+  });
 };
 
-// Delete reservation
-exports.deleteReservation = (req, res) => {
-  const { id } = req.params;
+// Hapus reservasi
+const deleteReservation = (req, res) => {
+  const id = req.params.id;
   reservationsModel.deleteReservation(id, (err) => {
     if (err) {
-      return res
-        .status(500)
-        .json({ message: "Failed to delete reservation", error: err.message });
+      return res.status(500).json({ error: "Failed to delete reservation" });
     }
     res.status(200).json({ message: "Reservation deleted successfully" });
   });
+};
+
+module.exports = {
+  createReservation,
+  getAllReservations,
+  getReservationById,
+  updateReservation,
+  deleteReservation,
 };
