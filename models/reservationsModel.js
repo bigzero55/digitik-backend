@@ -1,25 +1,19 @@
 const db = require("./db");
 
-// Fungsi untuk menambah reservation
-const addReservation = (
-  participantId,
-  eventId,
-  status,
-  amount,
-  createdAt,
-  callback
-) => {
+// Tambah reservasi baru
+const addReservation = (reservation, callback) => {
+  const { participant_id, event_id, status, amount, created_at } = reservation;
   const sql = `
     INSERT INTO reservations (participant_id, event_id, status, amount, created_at)
     VALUES (?, ?, ?, ?, ?)
   `;
-  const params = [participantId, eventId, status, amount, createdAt];
+  const params = [participant_id, event_id, status, amount, created_at];
   db.run(sql, params, function (err) {
-    callback(err, this.lastID);
+    callback(err, this.lastID); // Mengembalikan ID reservasi yang baru
   });
 };
 
-// Fungsi untuk mendapatkan semua reservations
+// Dapatkan semua reservasi
 const getAllReservations = (callback) => {
   const sql = "SELECT * FROM reservations";
   db.all(sql, [], (err, rows) => {
@@ -27,7 +21,7 @@ const getAllReservations = (callback) => {
   });
 };
 
-// Fungsi untuk mendapatkan reservation berdasarkan ID
+// Dapatkan reservasi berdasarkan ID
 const getReservationById = (id, callback) => {
   const sql = "SELECT * FROM reservations WHERE id = ?";
   db.get(sql, [id], (err, row) => {
@@ -35,31 +29,24 @@ const getReservationById = (id, callback) => {
   });
 };
 
-// Fungsi untuk mengupdate reservation
-const updateReservation = (
-  id,
-  participantId,
-  eventId,
-  status,
-  amount,
-  updatedAt,
-  callback
-) => {
+// Update data reservasi
+const updateReservation = (id, reservation, callback) => {
+  const { participant_id, event_id, status, amount, updated_at } = reservation;
   const sql = `
     UPDATE reservations
     SET participant_id = ?, event_id = ?, status = ?, amount = ?, updated_at = ?
     WHERE id = ?
   `;
-  const params = [participantId, eventId, status, amount, updatedAt, id];
-  db.run(sql, params, function (err) {
+  const params = [participant_id, event_id, status, amount, updated_at, id];
+  db.run(sql, params, (err) => {
     callback(err);
   });
 };
 
-// Fungsi untuk menghapus reservation
+// Hapus reservasi
 const deleteReservation = (id, callback) => {
   const sql = "DELETE FROM reservations WHERE id = ?";
-  db.run(sql, [id], function (err) {
+  db.run(sql, [id], (err) => {
     callback(err);
   });
 };
