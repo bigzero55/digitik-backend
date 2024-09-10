@@ -1,20 +1,20 @@
 const express = require("express");
-const router = express.Router();
 const reservationsController = require("../controllers/reservationsController");
+const router = express.Router();
 
-// Endpoint untuk menambah reservation
-router.post("/", reservationsController.addReservation);
+// Tambah reservasi baru
+router.post("/reservations", reservationsController.createReservation);
 
-// Endpoint untuk mendapatkan semua reservations
-router.get("/", reservationsController.getAllReservations);
+// Dapatkan semua reservasi
+router.get("/reservations", reservationsController.getAllReservations);
 
-// Endpoint untuk mendapatkan reservation berdasarkan ID
-router.get("/:id", reservationsController.getReservationById);
+// Dapatkan reservasi berdasarkan ID
+router.get("/reservations/:id", reservationsController.getReservationById);
 
-// Endpoint untuk mengupdate reservation
-router.put("/:id", reservationsController.updateReservation);
+// Update data reservasi
+router.put("/reservations/:id", reservationsController.updateReservation);
 
-// Endpoint untuk menghapus reservation
-router.delete("/:id", reservationsController.deleteReservation);
+// Hapus reservasi
+router.delete("/reservations/:id", reservationsController.deleteReservation);
 
 module.exports = router;
