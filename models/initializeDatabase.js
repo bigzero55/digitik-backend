@@ -23,6 +23,8 @@ const initializeDatabase = () => {
       FOREIGN KEY (user_id) REFERENCES users(id)
     )`);
 
+    //unused
+
     db.run(`CREATE TABLE IF NOT EXISTS participants_additional_info (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       participant_id INTEGER NOT NULL,

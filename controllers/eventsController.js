@@ -1,91 +1,102 @@
 const eventModel = require("../models/eventsModel");
 const scannedModel = require("../models/scannedModel");
 
-exports.getAllEvents = async (req, res) => {
-  try {
-    const events = await eventModel.getAllEvents();
-    res.json(events);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.getEventById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const event = await eventModel.getEventById(id);
-    if (event) {
-      res.json(event);
-    } else {
-      res.status(404).json({ error: "Event not found" });
+// Controller untuk mendapatkan semua event
+const getAllEvents = (req, res) => {
+  eventModel.getAllEvents((err, events) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to retrieve events." });
     }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    return res.status(200).json(events);
+  });
 };
 
-exports.createEvent = async (req, res) => {
+// Controller untuk mendapatkan event berdasarkan ID
+const getEventById = (req, res) => {
+  const id = req.params.id;
+  eventModel.getEventById(id, (err, event) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to retrieve event." });
+    }
+    if (!event) {
+      return res.status(404).json({ error: "Event not found." });
+    }
+    return res.status(200).json(event);
+  });
+};
+
+// Controller untuk membuat event baru
+const createEvent = (req, res) => {
   const event = req.body;
-  try {
-    const newEventId = await eventModel.addEvent(
-      event.user_id,
-      event.title,
-      event.unix,
-      event.description,
-      event.date,
-      event.price,
-      event.capacity,
-      event.location
-    );
-    res.status(201).json({ id: newEventId });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  eventModel.addEvent(event, (err, newEventId) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to create event." });
+    }
+    return res
+      .status(201)
+      .json({ message: "Event created successfully", id: newEventId });
+  });
 };
 
-exports.updateEvent = async (req, res) => {
-  const { id } = req.params;
+// Controller untuk mengupdate event
+const updateEvent = (req, res) => {
+  const id = req.params.id;
   const event = req.body;
-  try {
-    await eventModel.updateEvent(
-      id,
-      event.user_id,
-      event.title,
-      event.unix,
-      event.description,
-      event.date,
-      event.price,
-      event.capacity,
-      event.location
-    );
-    res.json({ message: "Event updated successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  eventModel.updateEvent(id, event, (err) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to update event." });
+    }
+    return res.status(200).json({ message: "Event updated successfully." });
+  });
 };
 
-exports.deleteEvent = async (req, res) => {
-  const { id } = req.params;
-  try {
-    // Get all sessions related to the event
-    const sessions = await eventModel.getSessionsByEvent(id);
+// Controller untuk menghapus event
+const deleteEvent = (req, res) => {
+  const id = req.params.id;
 
-    // Delete all scanned records related to these sessions
-    for (const session of sessions) {
-      await scannedModel.deleteScannedBySession(session.id);
+  // Dapatkan semua sesi yang terkait dengan event
+  eventModel.getSessionsByEvent(id, (err, sessions) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to retrieve sessions." });
     }
 
-    // Delete all sessions related to the event
-    await eventModel.deleteSessionsByEvent(id);
-
-    // Delete the event itself
-    await eventModel.deleteEvent(id);
-
-    res.json({
-      message:
-        "Event and related sessions and scanned records deleted successfully",
+    // Hapus semua scanned records terkait dengan sesi
+    sessions.forEach((session) => {
+      scannedModel.deleteScannedBySession(session.id, (err) => {
+        if (err) {
+          return res
+            .status(500)
+            .json({ error: "Failed to delete scanned records." });
+        }
+      });
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+
+    // Hapus semua sesi yang terkait dengan event
+    eventModel.deleteSessionsByEvent(id, (err) => {
+      if (err) {
+        return res.status(500).json({ error: "Failed to delete sessions." });
+      }
+
+      // Hapus event itu sendiri
+      eventModel.deleteEvent(id, (err) => {
+        if (err) {
+          return res.status(500).json({ error: "Failed to delete event." });
+        }
+        return res
+          .status(200)
+          .json({
+            message:
+              "Event and related sessions and scanned records deleted successfully.",
+          });
+      });
+    });
+  });
+};
+
+module.exports = {
+  getAllEvents,
+  getEventById,
+  createEvent,
+  updateEvent,
+  deleteEvent,
 };

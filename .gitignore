@@ -19,7 +19,7 @@ tmp/
 temp/
 
 # Environment variables
-.env
+
 
 # IDE/editor configurations
 .vscode/

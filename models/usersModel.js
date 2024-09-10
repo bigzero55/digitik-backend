@@ -2,9 +2,10 @@ const db = require("./db");
 
 // Tambah user baru
 const addUser = (user, callback) => {
-  const { username, password, full_name } = user;
-  const sql = "INSERT INTO users (username, email, password, full_name) VALUES (?, ?, ?, ?)";
-  const params = [username, password, full_name];
+  const { username, email, password, full_name } = user;
+  const sql =
+    "INSERT INTO users (username, email, password, full_name) VALUES (?, ?, ?, ?)";
+  const params = [username, email, password, full_name];
   db.run(sql, params, function (err) {
     callback(err, this.lastID);
   });
@@ -29,7 +30,8 @@ const getUserById = (id, callback) => {
 // Update data user
 const updateUser = (id, user, callback) => {
   const { username, password, full_name } = user;
-  const sql = "UPDATE users SET username = ?, password = ?, full_name = ? WHERE id = ?";
+  const sql =
+    "UPDATE users SET username = ?, password = ?, full_name = ? WHERE id = ?";
   const params = [username, password, full_name, id];
   db.run(sql, params, (err) => {
     callback(err);
