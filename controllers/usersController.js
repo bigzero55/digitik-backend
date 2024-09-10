@@ -1,82 +1,73 @@
-const usersModel = require("../models/usersModel");
+const usersModel = require("../model/usersModel");
 
-// Tambah user
-exports.addUser = (req, res) => {
-  const { username, password, role } = req.body;
+// Controller untuk menambah user baru
+const addUser = (req, res) => {
+  const { username, password, full_name } = req.body;
+  const newUser = { username, password, full_name };
 
-  if (!username || !password || !role) {
-    return res.status(400).json({ message: "All fields are required!" });
-  }
-
-  usersModel.addUser(username, password, role, (err, userId) => {
+  usersModel.addUser(newUser, (err, userId) => {
     if (err) {
-      return res
-        .status(500)
-        .json({ message: "Failed to add user", error: err.message });
+      return res.status(500).json({ error: "Gagal menambahkan user." });
     }
-    res.status(201).json({
-      message: "User added successfully",
-      userId: userId,
-    });
+    res.status(201).json({ message: "User berhasil ditambahkan.", userId });
   });
 };
 
-// Get all users
-exports.getAllUsers = (req, res) => {
+// Controller untuk mendapatkan semua users
+const getAllUsers = (req, res) => {
   usersModel.getAllUsers((err, users) => {
     if (err) {
-      return res
-        .status(500)
-        .json({ message: "Failed to retrieve users", error: err.message });
+      return res.status(500).json({ error: "Gagal mendapatkan users." });
     }
     res.status(200).json(users);
   });
 };
 
-// Get user by ID
-exports.getUserById = (req, res) => {
-  const { id } = req.params;
-  usersModel.getUserById(id, (err, user) => {
+// Controller untuk mendapatkan user berdasarkan ID
+const getUserById = (req, res) => {
+  const userId = req.params.id;
+
+  usersModel.getUserById(userId, (err, user) => {
     if (err) {
-      return res
-        .status(500)
-        .json({ message: "Failed to retrieve user", error: err.message });
+      return res.status(500).json({ error: "Gagal mendapatkan user." });
     }
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ error: "User tidak ditemukan." });
     }
     res.status(200).json(user);
   });
 };
 
-// Update user
-exports.updateUser = (req, res) => {
-  const { id } = req.params;
-  const { username, password, role } = req.body;
+// Controller untuk mengupdate user berdasarkan ID
+const updateUser = (req, res) => {
+  const userId = req.params.id;
+  const { username, password, full_name } = req.body;
+  const updatedUser = { username, password, full_name };
 
-  if (!username || !password || !role) {
-    return res.status(400).json({ message: "All fields are required!" });
-  }
-
-  usersModel.updateUser(id, username, password, role, (err) => {
+  usersModel.updateUser(userId, updatedUser, (err) => {
     if (err) {
-      return res
-        .status(500)
-        .json({ message: "Failed to update user", error: err.message });
+      return res.status(500).json({ error: "Gagal mengupdate user." });
     }
-    res.status(200).json({ message: "User updated successfully" });
+    res.status(200).json({ message: "User berhasil diupdate." });
   });
 };
 
-// Delete user
-exports.deleteUser = (req, res) => {
-  const { id } = req.params;
-  usersModel.deleteUser(id, (err) => {
+// Controller untuk menghapus user berdasarkan ID
+const deleteUser = (req, res) => {
+  const userId = req.params.id;
+
+  usersModel.deleteUser(userId, (err) => {
     if (err) {
-      return res
-        .status(500)
-        .json({ message: "Failed to delete user", error: err.message });
+      return res.status(500).json({ error: "Gagal menghapus user." });
     }
-    res.status(200).json({ message: "User deleted successfully" });
+    res.status(200).json({ message: "User berhasil dihapus." });
   });
+};
+
+module.exports = {
+  addUser,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
 };
