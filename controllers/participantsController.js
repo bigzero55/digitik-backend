@@ -1,88 +1,67 @@
-const db = require("../models/db");
+const participantsModel = require('../models/participantsModel');
 
-// Get all participants
-exports.getAllParticipants = (req, res) => {
-  db.all("SELECT * FROM participants", (err, rows) => {
+// Controller untuk menambah participant
+const createParticipant = (req, res) => {
+  const participant = req.body;
+  participantsModel.createParticipant(participant, (err, participantId) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: "Failed to create participant." });
     }
-    res.json(rows);
+    return res.status(201).json({ message: "Participant created successfully", participantId });
   });
 };
 
-// Get a single participant
-exports.getParticipantById = (req, res) => {
-  const { id } = req.params;
-  db.get("SELECT * FROM participants WHERE id = ?", [id], (err, row) => {
+// Controller untuk mendapatkan semua participants
+const getAllParticipants = (req, res) => {
+  participantsModel.getAllParticipants((err, participants) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: "Failed to retrieve participants." });
     }
-    res.json(row);
+    return res.status(200).json(participants);
   });
 };
 
-// Create a new participant
-exports.createParticipant = (req, res) => {
-  const { name, address, whatsapp, gender } = req.body;
-  const query =
-    "INSERT INTO participants (name, address, whatsapp, gender) VALUES (?, ?, ?, ?)";
-  db.run(query, [name, address, whatsapp, gender], function (err) {
+// Controller untuk mendapatkan participant berdasarkan ID
+const getParticipantById = (req, res) => {
+  const id = req.params.id;
+  participantsModel.getParticipantById(id, (err, participant) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: "Failed to retrieve participant." });
     }
-    res.status(201).json({ id: this.lastID });
+    if (!participant) {
+      return res.status(404).json({ error: "Participant not found." });
+    }
+    return res.status(200).json(participant);
   });
 };
 
-// Update a participant
-exports.updateParticipant = (req, res) => {
-  const { id } = req.params;
-  const { name, address, whatsapp, gender } = req.body;
-  const query =
-    "UPDATE participants SET name = ?, address = ?, whatsapp = ?, gender = ? WHERE id = ?";
-  db.run(query, [name, address, whatsapp, gender, id], function (err) {
+// Controller untuk mengupdate participant
+const updateParticipant = (req, res) => {
+  const id = req.params.id;
+  const updatedParticipant = req.body;
+  participantsModel.updateParticipant(id, updatedParticipant, (err) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: "Failed to update participant." });
     }
-    res.status(200).json({ message: "Participant updated successfully" });
+    return res.status(200).json({ message: "Participant updated successfully." });
   });
 };
 
-// Delete a participant
-exports.deleteParticipant = (req, res) => {
-  const { id } = req.params;
-  db.run("DELETE FROM participants WHERE id = ?", [id], function (err) {
+// Controller untuk menghapus participant
+const deleteParticipant = (req, res) => {
+  const id = req.params.id;
+  participantsModel.deleteParticipant(id, (err) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ error: "Failed to delete participant." });
     }
-    res.status(200).json({ message: "Participant deleted successfully" });
+    return res.status(200).json({ message: "Participant deleted successfully." });
   });
 };
 
-// Add additional info for a participant
-exports.addAdditionalInfo = (req, res) => {
-  const { participant_id, size, transport_type, city } = req.body;
-  const query =
-    "INSERT INTO participants_additional_info (participant_id, size, transport_type, city) VALUES (?, ?, ?, ?)";
-  db.run(query, [participant_id, size, transport_type, city], function (err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.status(201).json({ id: this.lastID });
-  });
-};
-
-// Get additional info for a participant
-exports.getAdditionalInfo = (req, res) => {
-  const { participant_id } = req.params;
-  db.get(
-    "SELECT * FROM participants_additional_info WHERE participant_id = ?",
-    [participant_id],
-    (err, row) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      res.json(row);
-    }
-  );
+module.exports = {
+  createParticipant,
+  getAllParticipants,
+  getParticipantById,
+  updateParticipant,
+  deleteParticipant,
 };
