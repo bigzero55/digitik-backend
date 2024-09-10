@@ -2,9 +2,7 @@ const usersModel = require("../models/usersModel");
 
 // Controller untuk menambah user baru
 const addUser = (req, res) => {
-  const { username, password, full_name } = req.body;
-  const newUser = { username, password, full_name };
-
+  const newUser = req.body
   usersModel.addUser(newUser, (err, userId) => {
     if (err) {
       return res.status(500).json({ error: "Gagal menambahkan user." });
