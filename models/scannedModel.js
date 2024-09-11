@@ -17,11 +17,12 @@ const getScannedById = (id, callback) => {
 };
 
 // Create a new scanned record
+
 const createScanned = (scanned, callback) => {
-  const { scanTime, participant_id, validator_id, session_id } = scanned;
+  const { participant_id, validator_id, session_id } = scanned;
   const sql =
-    "INSERT INTO scanned (scanTime, participant_id, validator_id, session_id) VALUES (?, ?, ?, ?)";
-  const params = [scanTime, participant_id, validator_id, session_id];
+    "INSERT INTO scanned (participant_id, validator_id, session_id) VALUES (?, ?, ?)";
+  const params = [participant_id, validator_id, session_id];
   db.run(sql, params, function (err) {
     callback(err, this.lastID);
   });
@@ -29,7 +30,7 @@ const createScanned = (scanned, callback) => {
 
 // Update a scanned record
 const updateScanned = (id, scanned, callback) => {
-  const { scanTime, participant_id, validator_id, session_id } = scanned;
+  const { participant_id, validator_id, session_id } = scanned;
   const sql =
     "UPDATE scanned SET scanTime = ?, participant_id = ?, validator_id = ?, session_id = ? WHERE id = ?";
   const params = [scanTime, participant_id, validator_id, session_id, id];
