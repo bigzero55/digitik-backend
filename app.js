@@ -2,24 +2,28 @@ const express = require("express");
 const app = express();
 const errorHandler = require("./middlewares/errorHandler");
 const cors = require("cors");
+require("dotenv").config();
 
-// Import routes
 const apiRoutes = require("./routes/index");
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
 
-// Middleware
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5000", // Atau gunakan '*' untuk mengizinkan semua origin
-    methods: ["GET", "POST", "PUT", "DELETE"], // Tentukan metode yang diizinkan
-    credentials: true, // Jika perlu mengirim cookies
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   })
 );
 
-// Routes
 app.use("/api", apiRoutes);
-
-// Error handling middleware
 app.use(errorHandler);
 
 module.exports = app;
