@@ -1,84 +1,85 @@
 const sessionModel = require("../models/sessionsModel");
-const scannedModel = require("../models/scannedModel"); // Import model scanned
+const scannedModel = require("../models/scannedModel");
 
-// Get all sessions
-exports.getAllSessions = async (req, res) => {
-  try {
-    const sessions = await sessionModel.getAllSessions();
-    res.json(sessions);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Get a single session by ID
-exports.getSessionById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const session = await sessionModel.getSessionById(id);
-    if (session) {
-      res.json(session);
+// Mendapatkan semua sesi
+const getAllSessions = (req, res) => {
+  sessionModel.getAllSessions((err, sessions) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
     } else {
-      res.status(404).json({ error: "Session not found" });
+      res.json(sessions);
     }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Create a new session
-exports.createSession = async (req, res) => {
-  const session = req.body;
-  try {
-    const newSessionId = await sessionModel.createSession(session);
-    res.status(201).json({ id: newSessionId });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Update a session
-exports.updateSession = async (req, res) => {
-  const { id } = req.params;
-  const session = req.body;
-  try {
-    await sessionModel.updateSession(id, session);
-    res.json({ message: "Session updated successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Delete a session and associated scanned records
-exports.deleteSession = async (req, res) => {
-  const { id } = req.params;
-  try {
-    // Delete all scanned records related to the session
-    await scannedModel.deleteScannedBySession(id);
-
-    // Delete the session itself
-    await sessionModel.deleteSession(id);
-
-    res.json({
-      message: "Session and related scanned records deleted successfully",
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.deleteSessionsByEvent = (event_id) => {
-  return new Promise((resolve, reject) => {
-    db.run(
-      "DELETE FROM sessions WHERE event_id = ?",
-      [event_id],
-      function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      }
-    );
   });
+};
+
+// Mendapatkan sesi berdasarkan ID
+const getSessionById = (req, res) => {
+  const { id } = req.params;
+  sessionModel.getSessionById(id, (err, session) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else if (!session) {
+      res.status(404).json({ error: "Session not found" });
+    } else {
+      res.json(session);
+    }
+  });
+};
+
+// Membuat sesi baru
+const createSession = (req, res) => {
+  const session = req.body;
+  sessionModel.createSession(session, (err, newSessionId) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.status(201).json({ id: newSessionId });
+    }
+  });
+};
+
+// Memperbarui sesi berdasarkan ID
+const updateSession = (req, res) => {
+  const { id } = req.params;
+  const session = req.body;
+  sessionModel.updateSession(id, session, (err) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json({ message: "Session updated successfully" });
+    }
+  });
+};
+
+// Menghapus sesi dan catatan yang terkait pada tabel 'scanned'
+const deleteSession = (req, res) => {
+  const { id } = req.params;
+  scannedModel.deleteScannedBySession(id, (err) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      sessionModel.deleteSession(id, (err) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+        } else {
+          res.json({ message: "Session and related scanned records deleted successfully" });
+        }
+      });
+    }
+  });
+};
+
+// Menghapus semua sesi berdasarkan ID event
+const deleteSessionsByEvent = (event_id, callback) => {
+  sessionModel.deleteSessionsByEvent(event_id, callback);
+};
+
+// Export fungsi-fungsi sebagai variabel
+module.exports = {
+  getAllSessions,
+  getSessionById,
+  createSession,
+  updateSession,
+  deleteSession,
+  deleteSessionsByEvent,
 };
