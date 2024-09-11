@@ -83,7 +83,7 @@ const initializeDatabase = () => {
       FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (event_id) REFERENCES events(id)
     )`);
-
+//undrefactored
     db.run(`CREATE TABLE IF NOT EXISTS validators (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
