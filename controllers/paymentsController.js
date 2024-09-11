@@ -4,7 +4,7 @@ require("dotenv").config();
 
 // Buat instance Snap API Midtrans
 let snap = new midtransClient.Snap({
-  isProduction: process.env.M_PRODUCTION
+  isProduction: process.env.M_PRODUCTION,
   serverKey: process.env.M_SERVER_KEY, // Ambil serverKey dari .env
 });
 
