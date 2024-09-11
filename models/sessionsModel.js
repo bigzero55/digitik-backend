@@ -16,12 +16,12 @@ const getSessionById = (id, callback) => {
   });
 };
 
-// Create a new session
+// Create a new session 
 const createSession = (session, callback) => {
-  const { event_id, unix, name, desc } = session;
+  const {user_id, event_id, unix, name, description } = session;
   const sql =
-    "INSERT INTO sessions (event_id, unix, name, desc) VALUES (?, ?, ?, ?)";
-  const params = [event_id, unix, name, desc];
+    "INSERT INTO sessions (user_id, event_id, unix, name, description) VALUES (?, ?, ?,?, ?)";
+  const params = [user_id, event_id, unix, name, description];
   db.run(sql, params, function (err) {
     callback(err, this.lastID);
   });
@@ -29,10 +29,10 @@ const createSession = (session, callback) => {
 
 // Update a session
 const updateSession = (id, session, callback) => {
-  const { event_id, unix, name, desc } = session;
+  const { name, description } = session;
   const sql =
-    "UPDATE sessions SET event_id = ?, unix = ?, name = ?, desc = ? WHERE id = ?";
-  const params = [event_id, unix, name, desc, id];
+    "UPDATE sessions SET name = ?, description = ? WHERE id = ?";
+  const params = [name, description];
   db.run(sql, params, (err) => {
     callback(err);
   });
