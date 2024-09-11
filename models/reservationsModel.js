@@ -4,10 +4,10 @@ const db = require("./db");
 const addReservation = (reservation, callback) => {
   const { user_id, participant_id, event_id, status, status, booking_code } = reservation;
   const sql = `
-    INSERT INTO reservations (user_id, participant_id, event_id, status, status, booking_code )
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO reservations (user_id, participant_id, event_id,status, booking_code )
+    VALUES (?, ?, ?, ?, ?)
   `;
-  const params = [user_id, participant_id, event_id, status, status, booking_code ];
+  const params = [user_id, participant_id, event_id,status, booking_code ];
   db.run(sql, params, function (err) {
     callback(err, this.lastID); // Mengembalikan ID reservasi yang baru
   });
