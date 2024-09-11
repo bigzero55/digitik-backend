@@ -2,7 +2,7 @@ const db = require("./db");
 
 // Tambah reservasi baru
 const addReservation = (reservation, callback) => {
-  const { user_id, participant_id, event_id, status, status, booking_code } = reservation;
+  const { user_id, participant_id, event_id, status, booking_code } = reservation;
   const sql = `
     INSERT INTO reservations (user_id, participant_id, event_id,status, booking_code )
     VALUES (?, ?, ?, ?, ?)
