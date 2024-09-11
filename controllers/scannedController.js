@@ -1,60 +1,71 @@
 const scannedModel = require("../models/scannedModel");
 
 // Get all scanned records
-exports.getAllScanned = async (req, res) => {
-  try {
-    const scannedRecords = await scannedModel.getAllScanned();
-    res.json(scannedRecords);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+const getAllScanned = (req, res) => {
+  scannedModel.getAllScanned((err, scannedRecords) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json(scannedRecords);
+    }
+  });
 };
 
 // Get a single scanned record by ID
-exports.getScannedById = async (req, res) => {
+const getScannedById = (req, res) => {
   const { id } = req.params;
-  try {
-    const scannedRecord = await scannedModel.getScannedById(id);
-    if (scannedRecord) {
+  scannedModel.getScannedById(id, (err, scannedRecord) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else if (scannedRecord) {
       res.json(scannedRecord);
     } else {
       res.status(404).json({ error: "Scanned record not found" });
     }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  });
 };
 
 // Create a new scanned record
-exports.createScanned = async (req, res) => {
+const createScanned = (req, res) => {
   const scanned = req.body;
-  try {
-    const newScannedId = await scannedModel.createScanned(scanned);
-    res.status(201).json({ id: newScannedId });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  scannedModel.createScanned(scanned, (err, newScannedId) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.status(201).json({ id: newScannedId });
+    }
+  });
 };
 
 // Update a scanned record
-exports.updateScanned = async (req, res) => {
+const updateScanned = (req, res) => {
   const { id } = req.params;
   const scanned = req.body;
-  try {
-    await scannedModel.updateScanned(id, scanned);
-    res.json({ message: "Scanned record updated successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  scannedModel.updateScanned(id, scanned, (err) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json({ message: "Scanned record updated successfully" });
+    }
+  });
 };
 
 // Delete a scanned record
-exports.deleteScanned = async (req, res) => {
+const deleteScanned = (req, res) => {
   const { id } = req.params;
-  try {
-    await scannedModel.deleteScanned(id);
-    res.json({ message: "Scanned record deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  scannedModel.deleteScanned(id, (err) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json({ message: "Scanned record deleted successfully" });
+    }
+  });
+};
+
+module.exports = {
+  getAllScanned,
+  getScannedById,
+  createScanned,
+  updateScanned,
+  deleteScanned,
 };
