@@ -4,7 +4,7 @@ const { validationResult } = require("express-validator");
 const db = require("../models/db"); // Assumsi db.js digunakan untuk query
 
 // Sign Up
-exports.signup = async (req, res) => {
+const signup = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -13,19 +13,30 @@ exports.signup = async (req, res) => {
   const { username, email, password, full_name } = req.body;
 
   try {
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Cek apakah email sudah terdaftar
+    db.get(
+      `SELECT * FROM users WHERE email = ?`,
+      [email],
+      async (err, user) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (user)
+          return res.status(400).json({ message: "Email already in use" });
 
-    // Simpan user di database
-    db.run(
-      `INSERT INTO users (username, email, password, full_name) VALUES (?, ?, ?, ?)`,
-      [username, email, hashedPassword, full_name],
-      function (err) {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        res.status(201).json({ message: "User registered successfully" });
+        // Simpan user di database
+        db.run(
+          `INSERT INTO users (username, email, password, full_name) VALUES (?, ?, ?, ?)`,
+          [username, email, hashedPassword, full_name],
+          function (err) {
+            if (err) {
+              return res.status(500).json({ error: err.message });
+            }
+
+            res.status(201).json({ message: "User registered successfully" });
+          }
+        );
       }
     );
   } catch (err) {
@@ -34,7 +45,7 @@ exports.signup = async (req, res) => {
 };
 
 // Login
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -62,4 +73,9 @@ exports.login = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+};
+
+module.exports = {
+  signup,
+  login,
 };
