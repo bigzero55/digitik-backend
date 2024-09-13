@@ -83,7 +83,7 @@ const initializeDatabase = () => {
       FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (event_id) REFERENCES events(id)
     )`);
-//undrefactored
+    //undrefactored
     db.run(`CREATE TABLE IF NOT EXISTS validators (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
@@ -100,6 +100,14 @@ const initializeDatabase = () => {
       FOREIGN KEY (participant_id) REFERENCES participants(id),
       FOREIGN KEY (validator_id) REFERENCES validators(id),
       FOREIGN KEY (session_id) REFERENCES sessions(id)
+    )`);
+
+    db.run(`
+      CREATE TABLE IF NOT EXISTS verified (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      verified BOOLEAN DEFAULT false,
+      FOREIGN KEY (user_id) REFERENCES users(id)
     )`);
   });
 };
