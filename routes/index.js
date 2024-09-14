@@ -9,7 +9,6 @@ const sessionsRoutes = require("./sessionsRoutes");
 const validatorsRoutes = require("./validatorsRoutes");
 const scannedRoutes = require("./scannedRoutes");
 const authRoutes = require("./authRoutes");
-const nodemailer = require("nodemailer");
 
 router.use("/participants", participantsRoutes);
 router.use("/users", usersRoutes);
