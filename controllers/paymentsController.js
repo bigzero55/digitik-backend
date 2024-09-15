@@ -2,13 +2,11 @@ const midtransClient = require("midtrans-client");
 const paymentsModel = require("../models/paymentsModel");
 require("dotenv").config();
 
-// Buat instance Snap API Midtrans
 let snap = new midtransClient.Snap({
-  isProduction: process.env.M_PRODUCTION,
+  isProduction: process.env.NODE_ENV === "production",
   serverKey: process.env.M_SERVER_KEY, // Ambil serverKey dari .env
 });
 
-// Tambah payment dengan Midtrans
 const addPayment = (req, res) => {
   const { user_id, reservation_id, amount, payment_date, status, participantDetails } = req.body;
 
@@ -16,10 +14,9 @@ const addPayment = (req, res) => {
     return res.status(400).json({ message: "All fields are required!" });
   }
 
-  // Buat parameter transaksi Midtrans
   let parameter = {
     transaction_details: {
-      order_id: `reservation-${reservation_id}`, // Menggunakan reservation_id sebagai order_id
+      order_id: `reservation-${reservation_id}`,
       gross_amount: amount,
     },
     customer_details: {
@@ -33,12 +30,9 @@ const addPayment = (req, res) => {
     },
   };
 
-  // Buat transaksi Midtrans
   snap.createTransaction(parameter)
     .then((transaction) => {
       let transactionToken = transaction.token;
-
-      // Tambahkan payment ke database
       const newPayment = {
         user_id,
         reservation_id,
@@ -52,11 +46,10 @@ const addPayment = (req, res) => {
           return res.status(500).json({ message: "Failed to add payment", error: err.message });
         }
 
-        // Kirim respons ke frontend dengan token transaksi Midtrans
         res.status(201).json({
           message: "Payment added successfully",
           paymentId: paymentId,
-          transactionToken: transactionToken, // Kirim token ke frontend
+          transactionToken: transactionToken, 
         });
       });
     })
@@ -65,7 +58,6 @@ const addPayment = (req, res) => {
     });
 };
 
-// Dapatkan semua pembayaran
 const getAllPayments = (req, res) => {
   paymentsModel.getAllPayments((err, payments) => {
     if (err) {
@@ -75,10 +67,8 @@ const getAllPayments = (req, res) => {
   });
 };
 
-// Dapatkan pembayaran berdasarkan ID
 const getPaymentById = (req, res) => {
   const { id } = req.params;
-
   paymentsModel.getPaymentById(id, (err, payment) => {
     if (err) {
       return res.status(500).json({ message: "Failed to retrieve payment", error: err.message });
@@ -90,7 +80,6 @@ const getPaymentById = (req, res) => {
   });
 };
 
-// Update pembayaran
 const updatePayment = (req, res) => {
   const { id } = req.params;
   const { payment_date, status } = req.body;
@@ -112,10 +101,8 @@ const updatePayment = (req, res) => {
   });
 };
 
-// Hapus pembayaran
 const deletePayment = (req, res) => {
   const { id } = req.params;
-
   paymentsModel.deletePayment(id, (err) => {
     if (err) {
       return res.status(500).json({ message: "Failed to delete payment", error: err.message });
@@ -124,7 +111,6 @@ const deletePayment = (req, res) => {
   });
 };
 
-// Export semua fungsi
 module.exports = {
   addPayment,
   getAllPayments,
