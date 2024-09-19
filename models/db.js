@@ -20,5 +20,15 @@ db.getConnection()
     .catch((err) => {
         console.error("Gagal terhubung ke database:", err);
     });
+    
+    db.getConnection(function (err, connection) {
+  if (err instanceof Error) {
+    console.log(err);
+    return;
+  }
+
+  console.log("Database terhubung")
+
+});
 
 module.exports = db;
