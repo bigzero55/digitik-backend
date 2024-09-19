@@ -11,15 +11,6 @@ const db = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0
 });
-
-db.getConnection()
-    .then((connection) => {
-        console.log("Database berhasil terhubung!");
-        connection.release(); // Kembalikan koneksi setelah digunakan
-    })
-    .catch((err) => {
-        console.error("Gagal terhubung ke database:", err);
-    });
     
     db.getConnection(function (err, connection) {
   if (err instanceof Error) {
