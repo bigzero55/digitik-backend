@@ -1,115 +1,145 @@
-const db = require("./db");
+const db = require('./db');
 
 const initializeDatabase = () => {
-  db.serialize(() => {
-    // Create tables if they don't exist
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL,
-      email TEXT NOT NULL,
-      password TEXT NOT NULL,
-      full_name TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )`);
+    // Tabel 'users'
+    db.execute(`
+        CREATE TABLE IF NOT EXISTS users (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            username VARCHAR(100) NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            password TEXT NOT NULL,
+            role ENUM('admin', 'user') DEFAULT 'user',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        );
+    `, (err) => {
+        if (err) console.error("Error saat membuat tabel 'users': ", err);
+    });
 
-    db.run(`CREATE TABLE IF NOT EXISTS participants (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      name TEXT NOT NULL,
-      unix TEXT NOT NULL,
-      phone TEXT NOT NULL,
-      email TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )`);
+    // Tabel 'participants'
+    db.execute(`
+        CREATE TABLE IF NOT EXISTS participants (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            name VARCHAR(100) NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            phone TEXT NOT NULL,
+            address TEXT NOT NULL,
+            user_id INT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+    `, (err) => {
+        if (err) console.error("Error saat membuat tabel 'participants': ", err);
+    });
 
-    //undrefactored
+    // Tabel 'participants_additional_info'
+    db.execute(`
+        CREATE TABLE IF NOT EXISTS participants_additional_info (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            participant_id INT NOT NULL,
+            key_info VARCHAR(100) NOT NULL,
+            value_info TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (participant_id) REFERENCES participants(id)
+        );
+    `, (err) => {
+        if (err) console.error("Error saat membuat tabel 'participants_additional_info': ", err);
+    });
 
-    db.run(`CREATE TABLE IF NOT EXISTS participants_additional_info (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      participant_id INTEGER NOT NULL,
-      key TEXT NOT NULL,
-      value TEXT,
-      FOREIGN KEY (participant_id) REFERENCES participants(id)
-    )`);
+    // Tabel 'events'
+    db.execute(`
+        CREATE TABLE IF NOT EXISTS events (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            title VARCHAR(100) NOT NULL,
+            description TEXT NOT NULL,
+            start_date DATE NOT NULL,
+            end_date DATE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        );
+    `, (err) => {
+        if (err) console.error("Error saat membuat tabel 'events': ", err);
+    });
 
-    db.run(`CREATE TABLE IF NOT EXISTS events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      title TEXT NOT NULL,
-      unix TEXT NOT NULL,
-      description TEXT,
-      date DATE NOT NULL,
-      price INTEGER DEFAULT 0,
-      capacity INTEGER NOT NULL,
-      location TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )`);
+    // Tabel 'reservations'
+    db.execute(`
+        CREATE TABLE IF NOT EXISTS reservations (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            event_id INT NOT NULL,
+            participant_id INT NOT NULL,
+            status ENUM('pending', 'confirmed', 'cancelled') NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (event_id) REFERENCES events(id),
+            FOREIGN KEY (participant_id) REFERENCES participants(id)
+        );
+    `, (err) => {
+        if (err) console.error("Error saat membuat tabel 'reservations': ", err);
+    });
 
-    db.run(`CREATE TABLE IF NOT EXISTS reservations (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      participant_id INTEGER NOT NULL,
-      event_id INTEGER NOT NULL,
-      status TEXT NOT NULL,
-      booking_code TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id),
-      FOREIGN KEY (participant_id) REFERENCES participants(id),
-      FOREIGN KEY (event_id) REFERENCES events(id)
-    )`);
+    // Tabel 'payments'
+    db.execute(`
+        CREATE TABLE IF NOT EXISTS payments (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            reservation_id INT NOT NULL,
+            amount DECIMAL(10, 2) NOT NULL,
+            status ENUM('paid', 'unpaid') NOT NULL,
+            payment_date DATE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (reservation_id) REFERENCES reservations(id)
+        );
+    `, (err) => {
+        if (err) console.error("Error saat membuat tabel 'payments': ", err);
+    });
 
-    db.run(`CREATE TABLE IF NOT EXISTS payments (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      reservation_id INTEGER NOT NULL,
-      payment_date DATETIME NOT NULL,
-      amount DECIMAL(10,2) NOT NULL,
-      status TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id),
-      FOREIGN KEY (reservation_id) REFERENCES reservations(id)
-    )`);
+    // Tabel 'sessions'
+    db.execute(`
+        CREATE TABLE IF NOT EXISTS sessions (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            event_id INT NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            start_time TIME NOT NULL,
+            end_time TIME NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (event_id) REFERENCES events(id)
+        );
+    `, (err) => {
+        if (err) console.error("Error saat membuat tabel 'sessions': ", err);
+    });
 
-    db.run(`CREATE TABLE IF NOT EXISTS sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      event_id INTEGER NOT NULL,
-      unix TEXT NOT NULL,
-      name TEXT NOT NULL,
-      description TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id),
-      FOREIGN KEY (event_id) REFERENCES events(id)
-    )`);
-    //undrefactored
-    db.run(`CREATE TABLE IF NOT EXISTS validators (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      name TEXT NOT NULL,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )`);
+    // Tabel 'validators'
+    db.execute(`
+        CREATE TABLE IF NOT EXISTS validators (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            user_id INT NOT NULL,
+            validator_key VARCHAR(100) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+    `, (err) => {
+        if (err) console.error("Error saat membuat tabel 'validators': ", err);
+    });
 
-    db.run(`CREATE TABLE IF NOT EXISTS scanned (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      scanTime DATETIME DEFAULT CURRENT_TIMESTAMP,
-      participant_id INTEGER NOT NULL,
-      validator_id INTEGER NOT NULL,
-      session_id INTEGER NOT NULL,
-      FOREIGN KEY (participant_id) REFERENCES participants(id),
-      FOREIGN KEY (validator_id) REFERENCES validators(id),
-      FOREIGN KEY (session_id) REFERENCES sessions(id)
-    )`);
+    // Tabel 'scanned'
+    db.execute(`
+        CREATE TABLE IF NOT EXISTS scanned (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            session_id INT NOT NULL,
+            participant_id INT NOT NULL,
+            scanned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (session_id) REFERENCES sessions(id),
+            FOREIGN KEY (participant_id) REFERENCES participants(id)
+        );
+    `, (err) => {
+        if (err) console.error("Error saat membuat tabel 'scanned': ", err);
+    });
 
-    db.run(`
-      CREATE TABLE IF NOT EXISTS verified (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      verified BOOLEAN DEFAULT false,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )`);
-  });
+    console.log("Semua tabel berhasil dibuat atau sudah ada.");
 };
 
 module.exports = initializeDatabase;
