@@ -1,12 +1,24 @@
-const sqlite3 = require("sqlite3").verbose();
-require("dotenv").config();
-const DB_URL = process.env.DATABASE_URL;
-const db = new sqlite3.Database(DB_URL, (err) => {
-  if (err) {
-    console.error("Could not connect to database", err);
-  } else {
-    console.log("Connected to SQLite database");
-  }
+require("dotenv").config()
+const mysql = require('mysql2/promise');
+
+// Membuat koneksi ke MySQL
+const db = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,     
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
+
+db.getConnection()
+    .then((connection) => {
+        console.log("Database berhasil terhubung!");
+        connection.release(); // Kembalikan koneksi setelah digunakan
+    })
+    .catch((err) => {
+        console.error("Gagal terhubung ke database:", err);
+    });
 
 module.exports = db;
