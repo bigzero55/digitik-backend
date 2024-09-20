@@ -4,21 +4,27 @@ const auth = (req, res, next) => {
   const authHeader = req.header("Authorization");
 
   if (!authHeader) {
-    return res.status(401).json({ message: "No Authorization" });
+    const error = new Error("No Authorization header found");
+    error.code = "NO_AUTH_HEADER";
+    return next(error); // Pass error to error handler
   }
-  
+
   const token = authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "No token, authorization denied" });
+    const error = new Error("No token provided");
+    error.code = "NO_TOKEN_PROVIDED";
+    return next(error); // Pass error to error handler
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; 
+    req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ message: "Token is not valid" });
+    const error = new Error("Invalid token");
+    error.code = "INVALID_TOKEN";
+    return next(error); // Pass error to error handler
   }
 };
 
