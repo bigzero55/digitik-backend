@@ -18,24 +18,45 @@ const addEvent = (event, callback) => {
     capacity,
     location,
   ];
-  db.run(sql, params, function (err) {
-    callback(err, this.lastID);
+
+  db.execute(sql, params, (err, results) => {
+    if (err) {
+      err.message = "Gagal menambahkan event";
+      err.code = "EVENT_ADD_FAILED";
+      return callback(err, null);
+    } else {
+      callback(null, results.insertId);
+    }
   });
 };
 
 // Dapatkan semua events
 const getAllEvents = (callback) => {
   const sql = "SELECT * FROM events";
-  db.all(sql, [], (err, rows) => {
-    callback(err, rows);
+
+  db.execute(sql, [], (err, results) => {
+    if (err) {
+      err.message = "Gagal mengambil data events";
+      err.code = "EVENT_FETCH_FAILED";
+      return callback(err, null);
+    } else {
+      callback(null, results);
+    }
   });
 };
 
 // Dapatkan event berdasarkan ID
 const getEventById = (id, callback) => {
   const sql = "SELECT * FROM events WHERE id = ?";
-  db.get(sql, [id], (err, row) => {
-    callback(err, row);
+
+  db.execute(sql, [id], (err, results) => {
+    if (err) {
+      err.message = "Gagal mengambil data event";
+      err.code = "EVENT_FETCH_FAILED";
+      return callback(err, null);
+    } else {
+      callback(null, results[0]);
+    }
   });
 };
 
@@ -47,50 +68,71 @@ const updateEvent = (id, event, callback) => {
     SET title = ?, description = ?, date = ?, price = ?, capacity = ?, location = ?
     WHERE id = ?
   `;
-  const params = [
-    title,
-    description,
-    date,
-    price,
-    capacity,
-    location,
-    id,
-  ];
-  db.run(sql, params, (err) => {
-    callback(err);
+  const params = [title, description, date, price, capacity, location, id];
+
+  db.execute(sql, params, (err, results) => {
+    if (err) {
+      err.message = "Gagal mengupdate data event";
+      err.code = "EVENT_UPDATE_FAILED";
+      return callback(err);
+    } else {
+      callback(null, results.affectedRows);
+    }
   });
 };
 
 // Hapus event dan sesi terkait
 const deleteEvent = (id, callback) => {
-  db.serialize(() => {
-    // Hapus semua sesi terkait dengan event
-    db.run("DELETE FROM sessions WHERE event_id = ?", [id], (err) => {
+  db.execute(
+    "DELETE FROM sessions WHERE event_id = ?",
+    [id],
+    (err, results) => {
       if (err) {
-        callback(err);
-        return;
+        err.message = "Gagal menghapus event";
+        err.code = "EVENT_DELETE_FAILED";
+        return callback(err);
       }
-      // Hapus event
-      db.run("DELETE FROM events WHERE id = ?", [id], (err) => {
-        callback(err);
+
+      db.execute("DELETE FROM events WHERE id = ?", [id], (err, results) => {
+        if (err) {
+          err.message = "Gagal menghapus event";
+          err.code = "EVENT_DELETE_FAILED";
+          return callback(err);
+        } else {
+          callback(null, results.affectedRows);
+        }
       });
-    });
-  });
+    }
+  );
 };
 
 // Dapatkan semua sesi berdasarkan event ID
 const getSessionsByEvent = (event_id, callback) => {
   const sql = "SELECT * FROM sessions WHERE event_id = ?";
-  db.all(sql, [event_id], (err, rows) => {
-    callback(err, rows);
+
+  db.execute(sql, [event_id], (err, results) => {
+    if (err) {
+      err.message = "Gagal mengambil data sesi";
+      err.code = "SESSION_FETCH_FAILED";
+      return callback(err, null);
+    } else {
+      callback(null, results);
+    }
   });
 };
 
 // Hapus semua sesi berdasarkan event ID
 const deleteSessionsByEvent = (event_id, callback) => {
   const sql = "DELETE FROM sessions WHERE event_id = ?";
-  db.run(sql, [event_id], (err) => {
-    callback(err);
+
+  db.execute(sql, [event_id], (err, results) => {
+    if (err) {
+      err.message = "Gagal menghapus sesi";
+      err.code = "SESSION_DELETE_FAILED";
+      return callback(err);
+    } else {
+      callback(null, results.affectedRows);
+    }
   });
 };
 

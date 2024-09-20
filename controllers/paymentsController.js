@@ -8,10 +8,27 @@ let snap = new midtransClient.Snap({
 });
 
 const addPayment = (req, res) => {
-  const { user_id, reservation_id, amount, payment_date, status, participantDetails } = req.body;
+  const {
+    user_id,
+    reservation_id,
+    amount,
+    payment_date,
+    status,
+    participantDetails,
+  } = req.body;
 
-  if (!user_id || !reservation_id || !amount || !payment_date || !status || !participantDetails) {
-    return res.status(400).json({ message: "All fields are required!" });
+  if (
+    !user_id ||
+    !reservation_id ||
+    !amount ||
+    !payment_date ||
+    !status ||
+    !participantDetails
+  ) {
+    return res.status(400).json({
+      message: "All fields are required!",
+      code: "MISSING_PARAMETERS",
+    });
   }
 
   let parameter = {
@@ -30,7 +47,8 @@ const addPayment = (req, res) => {
     },
   };
 
-  snap.createTransaction(parameter)
+  snap
+    .createTransaction(parameter)
     .then((transaction) => {
       let transactionToken = transaction.token;
       const newPayment = {
@@ -43,25 +61,37 @@ const addPayment = (req, res) => {
 
       paymentsModel.addPayment(newPayment, (err, paymentId) => {
         if (err) {
-          return res.status(500).json({ message: "Failed to add payment", error: err.message });
+          return res.status(500).json({
+            message: "Failed to add payment",
+            error: err.message,
+            code: err.code,
+          });
         }
 
         res.status(201).json({
           message: "Payment added successfully",
           paymentId: paymentId,
-          transactionToken: transactionToken, 
+          transactionToken: transactionToken,
         });
       });
     })
     .catch((err) => {
-      res.status(500).json({ message: "Failed to create transaction", error: err.message });
+      res.status(500).json({
+        message: "Failed to create transaction",
+        error: err.message,
+        code: "MIDTRANS_ERROR",
+      });
     });
 };
 
 const getAllPayments = (req, res) => {
   paymentsModel.getAllPayments((err, payments) => {
     if (err) {
-      return res.status(500).json({ message: "Failed to retrieve payments", error: err.message });
+      return res.status(500).json({
+        message: "Failed to retrieve payments",
+        error: err.message,
+        code: err.code,
+      });
     }
     res.status(200).json(payments);
   });
@@ -71,10 +101,17 @@ const getPaymentById = (req, res) => {
   const { id } = req.params;
   paymentsModel.getPaymentById(id, (err, payment) => {
     if (err) {
-      return res.status(500).json({ message: "Failed to retrieve payment", error: err.message });
+      return res.status(500).json({
+        message: "Failed to retrieve payment",
+        error: err.message,
+        code: err.code,
+      });
     }
     if (!payment) {
-      return res.status(404).json({ message: "Payment not found" });
+      return res.status(404).json({
+        message: "Payment not found",
+        code: "PAYMENT_NOT_FOUND",
+      });
     }
     res.status(200).json(payment);
   });
@@ -85,7 +122,10 @@ const updatePayment = (req, res) => {
   const { payment_date, status } = req.body;
 
   if (!payment_date || !status) {
-    return res.status(400).json({ message: "All fields are required!" });
+    return res.status(400).json({
+      message: "All fields are required!",
+      code: "MISSING_PARAMETERS",
+    });
   }
 
   const updatedPayment = {
@@ -95,7 +135,11 @@ const updatePayment = (req, res) => {
 
   paymentsModel.updatePayment(id, updatedPayment, (err) => {
     if (err) {
-      return res.status(500).json({ message: "Failed to update payment", error: err.message });
+      return res.status(500).json({
+        message: "Failed to update payment",
+        error: err.message,
+        code: err.code,
+      });
     }
     res.status(200).json({ message: "Payment updated successfully" });
   });
@@ -105,7 +149,11 @@ const deletePayment = (req, res) => {
   const { id } = req.params;
   paymentsModel.deletePayment(id, (err) => {
     if (err) {
-      return res.status(500).json({ message: "Failed to delete payment", error: err.message });
+      return res.status(500).json({
+        message: "Failed to delete payment",
+        error: err.message,
+        code: err.code,
+      });
     }
     res.status(200).json({ message: "Payment deleted successfully" });
   });

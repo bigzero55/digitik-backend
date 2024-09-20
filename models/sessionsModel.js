@@ -1,48 +1,72 @@
 const db = require("./db");
 
-// Get all sessions
+// Dapatkan semua sesi
 const getAllSessions = (callback) => {
   const sql = "SELECT * FROM sessions";
-  db.all(sql, [], (err, rows) => {
-    callback(err, rows);
+  db.execute(sql, [], (err, rows) => {
+    if (err) {
+      err.message = "Gagal mengambil data sesi";
+      err.code = "SESSION_FETCH_FAILED";
+      return callback(err, null);
+    }
+    callback(null, rows);
   });
 };
 
-// Get a single session by ID
+// Dapatkan satu sesi berdasarkan ID
 const getSessionById = (id, callback) => {
   const sql = "SELECT * FROM sessions WHERE id = ?";
-  db.get(sql, [id], (err, row) => {
-    callback(err, row);
+  db.execute(sql, [id], (err, row) => {
+    if (err) {
+      err.message = "Gagal mengambil data sesi";
+      err.code = "SESSION_FETCH_FAILED";
+      return callback(err, null);
+    }
+    callback(null, row[0] || null); // MySQL2 mengembalikan array
   });
 };
 
-// Create a new session 
+// Buat sesi baru
 const createSession = (session, callback) => {
-  const {user_id, event_id, unix, name, description } = session;
+  const { user_id, event_id, unix, name, description } = session;
   const sql =
-    "INSERT INTO sessions (user_id, event_id, unix, name, description) VALUES (?, ?, ?,?, ?)";
+    "INSERT INTO sessions (user_id, event_id, unix, name, description) VALUES (?, ?, ?, ?, ?)";
   const params = [user_id, event_id, unix, name, description];
-  db.run(sql, params, function (err) {
-    callback(err, this.lastID);
+  db.execute(sql, params, (err, result) => {
+    if (err) {
+      err.message = "Gagal menambahkan sesi";
+      err.code = "SESSION_ADD_FAILED";
+      return callback(err, null);
+    }
+    callback(null, result ? result.insertId : null); // Mengembalikan ID sesi yang baru
   });
 };
 
-// Update a session
+// Update sesi
 const updateSession = (id, session, callback) => {
   const { name, description } = session;
-  const sql =
-    "UPDATE sessions SET name = ?, description = ? WHERE id = ?";
-  const params = [name, description];
-  db.run(sql, params, (err) => {
-    callback(err);
+  const sql = "UPDATE sessions SET name = ?, description = ? WHERE id = ?";
+  const params = [name, description, id];
+  db.execute(sql, params, (err) => {
+    if (err) {
+      err.message = "Gagal mengupdate data sesi";
+      err.code = "SESSION_UPDATE_FAILED";
+      return callback(err);
+    }
+    callback(null);
   });
 };
 
-// Delete a session
+// Hapus sesi
 const deleteSession = (id, callback) => {
   const sql = "DELETE FROM sessions WHERE id = ?";
-  db.run(sql, [id], (err) => {
-    callback(err);
+  db.execute(sql, [id], (err) => {
+    if (err) {
+      err.message = "Gagal menghapus data sesi";
+      err.code = "SESSION_DELETE_FAILED";
+      return callback(err);
+    }
+    callback(null);
   });
 };
 

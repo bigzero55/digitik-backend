@@ -2,10 +2,14 @@ const usersModel = require("../models/usersModel");
 
 // Controller untuk menambah user baru
 const addUser = (req, res) => {
-  const newUser = req.body
+  const newUser = req.body;
   usersModel.addUser(newUser, (err, userId) => {
     if (err) {
-      return res.status(500).json({ error: "Gagal menambahkan user." });
+      return res.status(500).json({
+        message: "Gagal menambahkan user.",
+        error: err.message,
+        code: err.code,
+      });
     }
     res.status(201).json({ message: "User berhasil ditambahkan.", userId });
   });
@@ -15,7 +19,11 @@ const addUser = (req, res) => {
 const getAllUsers = (req, res) => {
   usersModel.getAllUsers((err, users) => {
     if (err) {
-      return res.status(500).json({ error: "Gagal mendapatkan users." });
+      return res.status(500).json({
+        message: "Gagal mendapatkan users.",
+        error: err.message,
+        code: err.code,
+      });
     }
     res.status(200).json(users);
   });
@@ -27,10 +35,17 @@ const getUserById = (req, res) => {
 
   usersModel.getUserById(userId, (err, user) => {
     if (err) {
-      return res.status(500).json({ error: "Gagal mendapatkan user." });
+      return res.status(500).json({
+        message: "Gagal mendapatkan user.",
+        error: err.message,
+        code: err.code,
+      });
     }
     if (!user) {
-      return res.status(404).json({ error: "User tidak ditemukan." });
+      return res.status(404).json({
+        message: "User tidak ditemukan.",
+        code: "USER_NOT_FOUND",
+      });
     }
     res.status(200).json(user);
   });
@@ -44,7 +59,11 @@ const updateUser = (req, res) => {
 
   usersModel.updateUser(userId, updatedUser, (err) => {
     if (err) {
-      return res.status(500).json({ error: "Gagal mengupdate user." });
+      return res.status(500).json({
+        message: "Gagal mengupdate user.",
+        error: err.message,
+        code: err.code,
+      });
     }
     res.status(200).json({ message: "User berhasil diupdate." });
   });
@@ -56,7 +75,11 @@ const deleteUser = (req, res) => {
 
   usersModel.deleteUser(userId, (err) => {
     if (err) {
-      return res.status(500).json({ error: "Gagal menghapus user." });
+      return res.status(500).json({
+        message: "Gagal menghapus user.",
+        error: err.message,
+        code: err.code,
+      });
     }
     res.status(200).json({ message: "User berhasil dihapus." });
   });

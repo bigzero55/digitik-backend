@@ -5,10 +5,13 @@ const scannedModel = require("../models/scannedModel");
 const getAllSessions = (req, res) => {
   sessionModel.getAllSessions((err, sessions) => {
     if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json(sessions);
+      return res.status(500).json({
+        message: "Failed to retrieve sessions",
+        error: err.message,
+        code: err.code,
+      });
     }
+    res.json(sessions);
   });
 };
 
@@ -17,12 +20,18 @@ const getSessionById = (req, res) => {
   const { id } = req.params;
   sessionModel.getSessionById(id, (err, session) => {
     if (err) {
-      res.status(500).json({ error: err.message });
+      return res.status(500).json({
+        message: "Failed to retrieve session",
+        error: err.message,
+        code: err.code,
+      });
     } else if (!session) {
-      res.status(404).json({ error: "Session not found" });
-    } else {
-      res.json(session);
+      return res.status(404).json({
+        message: "Session not found",
+        code: "SESSION_NOT_FOUND",
+      });
     }
+    res.json(session);
   });
 };
 
@@ -31,10 +40,13 @@ const createSession = (req, res) => {
   const session = req.body;
   sessionModel.createSession(session, (err, newSessionId) => {
     if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.status(201).json({ id: newSessionId });
+      return res.status(500).json({
+        message: "Failed to create session",
+        error: err.message,
+        code: err.code,
+      });
     }
+    res.status(201).json({ id: newSessionId });
   });
 };
 
@@ -44,10 +56,13 @@ const updateSession = (req, res) => {
   const session = req.body;
   sessionModel.updateSession(id, session, (err) => {
     if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json({ message: "Session updated successfully" });
+      return res.status(500).json({
+        message: "Failed to update session",
+        error: err.message,
+        code: err.code,
+      });
     }
+    res.json({ message: "Session updated successfully" });
   });
 };
 
@@ -56,13 +71,23 @@ const deleteSession = (req, res) => {
   const { id } = req.params;
   scannedModel.deleteScannedBySession(id, (err) => {
     if (err) {
-      res.status(500).json({ error: err.message });
+      return res.status(500).json({
+        message: "Failed to delete session",
+        error: err.message,
+        code: err.code,
+      });
     } else {
       sessionModel.deleteSession(id, (err) => {
         if (err) {
-          res.status(500).json({ error: err.message });
+          return res.status(500).json({
+            message: "Failed to delete session",
+            error: err.message,
+            code: err.code,
+          });
         } else {
-          res.json({ message: "Session and related scanned records deleted successfully" });
+          res.json({
+            message: "Session and related scanned records deleted successfully",
+          });
         }
       });
     }

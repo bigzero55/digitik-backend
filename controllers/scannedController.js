@@ -4,10 +4,13 @@ const scannedModel = require("../models/scannedModel");
 const getAllScanned = (req, res) => {
   scannedModel.getAllScanned((err, scannedRecords) => {
     if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json(scannedRecords);
+      return res.status(500).json({
+        message: "Failed to retrieve scanned records",
+        error: err.message,
+        code: err.code,
+      });
     }
+    res.json(scannedRecords);
   });
 };
 
@@ -16,12 +19,19 @@ const getScannedById = (req, res) => {
   const { id } = req.params;
   scannedModel.getScannedById(id, (err, scannedRecord) => {
     if (err) {
-      res.status(500).json({ error: err.message });
-    } else if (scannedRecord) {
-      res.json(scannedRecord);
-    } else {
-      res.status(404).json({ error: "Scanned record not found" });
+      return res.status(500).json({
+        message: "Failed to retrieve scanned record",
+        error: err.message,
+        code: err.code,
+      });
     }
+    if (!scannedRecord) {
+      return res.status(404).json({
+        message: "Scanned record not found",
+        code: "SCAN_NOT_FOUND",
+      });
+    }
+    res.json(scannedRecord);
   });
 };
 
@@ -30,10 +40,13 @@ const createScanned = (req, res) => {
   const scanned = req.body;
   scannedModel.createScanned(scanned, (err, newScannedId) => {
     if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.status(201).json({ id: newScannedId });
+      return res.status(500).json({
+        message: "Failed to create scanned record",
+        error: err.message,
+        code: err.code,
+      });
     }
+    res.status(201).json({ id: newScannedId });
   });
 };
 
@@ -43,10 +56,13 @@ const updateScanned = (req, res) => {
   const scanned = req.body;
   scannedModel.updateScanned(id, scanned, (err) => {
     if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json({ message: "Scanned record updated successfully" });
+      return res.status(500).json({
+        message: "Failed to update scanned record",
+        error: err.message,
+        code: err.code,
+      });
     }
+    res.json({ message: "Scanned record updated successfully" });
   });
 };
 
@@ -55,10 +71,13 @@ const deleteScanned = (req, res) => {
   const { id } = req.params;
   scannedModel.deleteScanned(id, (err) => {
     if (err) {
-      res.status(500).json({ error: err.message });
-    } else {
-      res.json({ message: "Scanned record deleted successfully" });
+      return res.status(500).json({
+        message: "Failed to delete scanned record",
+        error: err.message,
+        code: err.code,
+      });
     }
+    res.json({ message: "Scanned record deleted successfully" });
   });
 };
 

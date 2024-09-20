@@ -19,7 +19,9 @@ tmp/
 temp/
 
 # Environment variables
-
+.env
+.env.local
+certs
 
 # IDE/editor configurations
 .vscode/

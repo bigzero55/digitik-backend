@@ -5,7 +5,10 @@ const scannedModel = require("../models/scannedModel");
 const getAllEvents = (req, res) => {
   eventModel.getAllEvents((err, events) => {
     if (err) {
-      return res.status(500).json({ error: "Failed to retrieve events." });
+      return res.status(500).json({
+        error: err.message,
+        code: err.code,
+      });
     }
     return res.status(200).json(events);
   });
@@ -16,10 +19,16 @@ const getEventById = (req, res) => {
   const id = req.params.id;
   eventModel.getEventById(id, (err, event) => {
     if (err) {
-      return res.status(500).json({ error: "Failed to retrieve event." });
+      return res.status(500).json({
+        error: err.message,
+        code: err.code,
+      });
     }
     if (!event) {
-      return res.status(404).json({ error: "Event not found." });
+      return res.status(404).json({
+        error: "Event not found.",
+        code: "EVENT_NOT_FOUND",
+      });
     }
     return res.status(200).json(event);
   });
@@ -30,7 +39,10 @@ const createEvent = (req, res) => {
   const event = req.body;
   eventModel.addEvent(event, (err, newEventId) => {
     if (err) {
-      return res.status(500).json({ error: "Failed to create event." });
+      return res.status(500).json({
+        error: err.message,
+        code: err.code,
+      });
     }
     return res
       .status(201)
@@ -44,7 +56,10 @@ const updateEvent = (req, res) => {
   const event = req.body;
   eventModel.updateEvent(id, event, (err) => {
     if (err) {
-      return res.status(500).json({ error: "Failed to update event." });
+      return res.status(500).json({
+        error: err.message,
+        code: err.code,
+      });
     }
     return res.status(200).json({ message: "Event updated successfully." });
   });
@@ -57,16 +72,20 @@ const deleteEvent = (req, res) => {
   // Dapatkan semua sesi yang terkait dengan event
   eventModel.getSessionsByEvent(id, (err, sessions) => {
     if (err) {
-      return res.status(500).json({ error: "Failed to retrieve sessions." });
+      return res.status(500).json({
+        error: err.message,
+        code: err.code,
+      });
     }
 
     // Hapus semua scanned records terkait dengan sesi
     sessions.forEach((session) => {
       scannedModel.deleteScannedBySession(session.id, (err) => {
         if (err) {
-          return res
-            .status(500)
-            .json({ error: "Failed to delete scanned records." });
+          return res.status(500).json({
+            error: err.message,
+            code: err.code,
+          });
         }
       });
     });
@@ -74,20 +93,24 @@ const deleteEvent = (req, res) => {
     // Hapus semua sesi yang terkait dengan event
     eventModel.deleteSessionsByEvent(id, (err) => {
       if (err) {
-        return res.status(500).json({ error: "Failed to delete sessions." });
+        return res.status(500).json({
+          error: err.message,
+          code: err.code,
+        });
       }
 
       // Hapus event itu sendiri
       eventModel.deleteEvent(id, (err) => {
         if (err) {
-          return res.status(500).json({ error: "Failed to delete event." });
-        }
-        return res
-          .status(200)
-          .json({
-            message:
-              "Event and related sessions and scanned records deleted successfully.",
+          return res.status(500).json({
+            error: err.message,
+            code: err.code,
           });
+        }
+        return res.status(200).json({
+          message:
+            "Event and related sessions and scanned records deleted successfully.",
+        });
       });
     });
   });

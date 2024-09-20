@@ -2,30 +2,69 @@ const db = require("./db");
 
 // Fungsi untuk menambah participant
 const createParticipant = (participant, callback) => {
-  const {user_id, name, unix, phone, email} = participant;
-  const sql = `
-    INSERT INTO participants (user_id, name, unix, phone, email)
-    VALUES (?, ?, ?, ?, ?)
+  const { user_id, name, unix, phone, email } = participant;
+
+  // Cek apakah email atau nomor telepon sudah ada
+  const checkSql = `
+    SELECT * FROM participants WHERE email = ? OR phone = ?
   `;
-  const params =[user_id, name, unix, phone, email];
-  db.run(sql, params, function (err) {
-    callback(err, this.lastID);
+  const checkParams = [email, phone];
+
+  db.execute(checkSql, checkParams, (err, rows) => {
+    if (err) {
+      err.message = "Gagal menjalankan query database";
+      err.code = "DATABASE_ERROR";
+      return callback(err, null);
+    }
+
+    // Jika sudah ada, tolak pembuatan participant
+    if (rows.length > 0) {
+      const error = new Error();
+      error.message = "Email atau nomor telepon sudah ada";
+      error.code = "EMAIL_PHONE_EXISTS";
+      return callback(error, null);
+    }
+
+    // Jika tidak ada, lanjutkan dengan pembuatan participant
+    const sql = `
+      INSERT INTO participants (user_id, name, unix, phone, email)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    const params = [user_id, name, unix, phone, email];
+    db.execute(sql, params, (err, result) => {
+      if (err) {
+        err.message = "Gagal menambahkan participant ke database";
+        err.code = "PARTICIPANT_CREATION_FAILED";
+        return callback(err, null);
+      }
+      callback(null, result.insertId);
+    });
   });
 };
 
 // Fungsi untuk mendapatkan semua participants
 const getAllParticipants = (callback) => {
   const sql = "SELECT * FROM participants";
-  db.all(sql, [], (err, rows) => {
-    callback(err, rows);
+  db.execute(sql, [], (err, rows) => {
+    if (err) {
+      err.message = "Gagal mengambil data participants dari database";
+      err.code = "PARTICIPANTS_FETCH_FAILED";
+      return callback(err, null);
+    }
+    callback(null, rows);
   });
 };
 
 // Fungsi untuk mendapatkan participant berdasarkan ID
 const getParticipantById = (id, callback) => {
   const sql = "SELECT * FROM participants WHERE id = ?";
-  db.get(sql, [id], (err, row) => {
-    callback(err, row);
+  db.execute(sql, [id], (err, rows) => {
+    if (err) {
+      err.message = "Gagal mengambil data participant dari database";
+      err.code = "PARTICIPANT_FETCH_FAILED";
+      return callback(err, null);
+    }
+    callback(null, rows[0] || null); // Mengambil peserta pertama jika ada
   });
 };
 
@@ -38,16 +77,26 @@ const updateParticipant = (id, participant, callback) => {
     WHERE id = ?
   `;
   const params = [name, phone, email, id];
-  db.run(sql, params, function (err) {
-    callback(err);
+  db.execute(sql, params, (err) => {
+    if (err) {
+      err.message = "Gagal mengupdate data participant";
+      err.code = "PARTICIPANT_UPDATE_FAILED";
+      return callback(err);
+    }
+    callback(null);
   });
 };
 
 // Fungsi untuk menghapus participant
 const deleteParticipant = (id, callback) => {
   const sql = "DELETE FROM participants WHERE id = ?";
-  db.run(sql, [id], function (err) {
-    callback(err);
+  db.execute(sql, [id], (err) => {
+    if (err) {
+      err.message = "Gagal menghapus data participant";
+      err.code = "PARTICIPANT_DELETE_FAILED";
+      return callback(err);
+    }
+    callback(null);
   });
 };
 

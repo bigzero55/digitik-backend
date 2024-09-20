@@ -1,13 +1,18 @@
-const participantsModel = require('../models/participantsModel');
+const participantsModel = require("../models/participantsModel");
 
 // Controller untuk menambah participant
 const createParticipant = (req, res) => {
   const participant = req.body;
   participantsModel.createParticipant(participant, (err, participantId) => {
     if (err) {
-      return res.status(500).json({ error: "Failed to create participant." });
+      return res.status(400).json({
+        error: err.message, // Kirim pesan error
+        code: err.code, // Kirim kode error
+      });
     }
-    return res.status(201).json({ message: "Participant created successfully", participantId });
+    return res
+      .status(201)
+      .json({ message: "Participant created successfully", participantId });
   });
 };
 
@@ -15,7 +20,10 @@ const createParticipant = (req, res) => {
 const getAllParticipants = (req, res) => {
   participantsModel.getAllParticipants((err, participants) => {
     if (err) {
-      return res.status(500).json({ error: "Failed to retrieve participants." });
+      return res.status(500).json({
+        error: err.message, // Kirim pesan error
+        code: err.code, // Kirim kode error
+      });
     }
     return res.status(200).json(participants);
   });
@@ -26,10 +34,16 @@ const getParticipantById = (req, res) => {
   const id = req.params.id;
   participantsModel.getParticipantById(id, (err, participant) => {
     if (err) {
-      return res.status(500).json({ error: "Failed to retrieve participant." });
+      return res.status(500).json({
+        error: err.message, // Kirim pesan error
+        code: err.code, // Kirim kode error
+      });
     }
     if (!participant) {
-      return res.status(404).json({ error: "Participant not found." });
+      return res.status(404).json({
+        error: "Participant not found.",
+        code: "NOT_FOUND", // Kode error jika participant tidak ditemukan
+      });
     }
     return res.status(200).json(participant);
   });
@@ -41,9 +55,14 @@ const updateParticipant = (req, res) => {
   const updatedParticipant = req.body;
   participantsModel.updateParticipant(id, updatedParticipant, (err) => {
     if (err) {
-      return res.status(500).json({ error: "Failed to update participant." });
+      return res.status(500).json({
+        error: err.message, // Kirim pesan error
+        code: err.code, // Kirim kode error
+      });
     }
-    return res.status(200).json({ message: "Participant updated successfully." });
+    return res
+      .status(200)
+      .json({ message: "Participant updated successfully." });
   });
 };
 
@@ -52,9 +71,14 @@ const deleteParticipant = (req, res) => {
   const id = req.params.id;
   participantsModel.deleteParticipant(id, (err) => {
     if (err) {
-      return res.status(500).json({ error: "Failed to delete participant." });
+      return res.status(500).json({
+        error: err.message, // Kirim pesan error
+        code: err.code, // Kirim kode error
+      });
     }
-    return res.status(200).json({ message: "Participant deleted successfully." });
+    return res
+      .status(200)
+      .json({ message: "Participant deleted successfully." });
   });
 };
 

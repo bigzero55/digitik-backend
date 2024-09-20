@@ -3,18 +3,18 @@ const reservationsController = require("../controllers/reservationsController");
 const router = express.Router();
 
 // Tambah reservasi baru
-router.post("/reservations", reservationsController.createReservation);
+router.post("/", reservationsController.createReservation);
 
 // Dapatkan semua reservasi
-router.get("/reservations", reservationsController.getAllReservations);
+router.get("/", reservationsController.getAllReservations);
 
 // Dapatkan reservasi berdasarkan ID
-router.get("/reservations/:id", reservationsController.getReservationById);
+router.get("/:id", reservationsController.getReservationById);
 
 // Update data reservasi
-router.put("/reservations/:id", reservationsController.updateReservation);
+router.put("/:id", reservationsController.updateReservation);
 
 // Hapus reservasi
-router.delete("/reservations/:id", reservationsController.deleteReservation);
+router.delete("/:id", reservationsController.deleteReservation);
 
 module.exports = router;
