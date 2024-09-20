@@ -24,6 +24,9 @@ app.use(
 );
 
 app.use("/api", apiRoutes);
+app.get("/", (req, res) => {
+  res.send("<h1>DIGITIK</h1><p>Backend For Digitik</p>");
+});
 app.use(errorHandler);
 
 module.exports = app;
