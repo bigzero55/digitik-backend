@@ -15,6 +15,13 @@ const addUser = (user, callback) => {
     } else {
       callback(null, results.insertId);
     }
+  
+  db.execute(sql, params, (err, results) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, results.insertId);
+    }
   });
 };
 
