@@ -48,7 +48,10 @@ const signup = (req, res) => {
               });
             }
 
-            res.status(201).json({ message: "User registered successfully" });
+            res.status(201).json({ 
+              message: "User registered successfully",
+              code: "USER_REGISTERED"
+            });
           }
         );
       });
@@ -102,7 +105,16 @@ const login = async (req, res) => {
             expiresIn: "2h",
           });
 
-          res.json({ token });
+          res.json({ 
+            message: "Login successfully",
+            code: "LOGIN_SUCCESS", 
+            user: {
+              username : user.username,
+              email: user.email,
+              full_name: user.full_name,
+              token
+            }
+          });
         });
       }
     );
