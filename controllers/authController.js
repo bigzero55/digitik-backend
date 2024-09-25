@@ -165,6 +165,16 @@ const signup = (req, res) => {
                       details: response.data.message,
                       code: "SMS_ERROR",
                     });
+                    // Hapus user dari database jika SMS gagal
+                    db.execute(
+                      `DELETE FROM users WHERE email = ?`,
+                      [email],
+                      (err) => {
+                        if (err) {
+                          console.error("Error deleting user:", err);
+                        }
+                      }
+                    );
                   }
                 })
                 .catch((error) => {
@@ -173,6 +183,16 @@ const signup = (req, res) => {
                     details: error.message,
                     code: "SMS_ERROR",
                   });
+                  // Hapus user dari database jika terjadi kesalahan
+                  db.execute(
+                    `DELETE FROM users WHERE email = ?`,
+                    [email],
+                    (err) => {
+                      if (err) {
+                        console.error("Error deleting user:", err);
+                      }
+                    }
+                  );
                 });
             }
           );
@@ -186,7 +206,6 @@ const signup = (req, res) => {
     });
   }
 };
-
 // Login
 const login = async (req, res) => {
   const { email, password } = req.body;
