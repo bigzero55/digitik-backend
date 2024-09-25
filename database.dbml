@@ -4,6 +4,8 @@ Table users {
   email VARCHAR(100) [not null]
   password VARCHAR(255) [not null]
   full_name VARCHAR(255) [not null]
+  phone VARCHAR(255) [not null]
+  verified BOOLEAN [default false]
   created_at DATETIME [default: `CURRENT_TIMESTAMP`]
 }
 
