@@ -154,7 +154,7 @@ const signup = (req, res) => {
                   text: `Hello, please verify your account using the following link: ${verificationLink}`,
                 })
                 .then((response) => {
-                  if (response.data.success) {
+                  if (response.data.ok) {
                     res.status(201).json({
                       message:
                         "User registered successfully. Verification link sent!",
